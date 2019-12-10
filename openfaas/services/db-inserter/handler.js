@@ -6,27 +6,37 @@ var pool;
 
 module.exports = async (event, context) => {
     if(!pool) {
-        pool = new Pool({
+        const poolConf = {
             user: fs.readFileSync("/var/openfaas/secrets/db-username", "utf-8"),
             host: fs.readFileSync("/var/openfaas/secrets/db-host", "utf-8"),
             database: process.env["db_name"],
             password: fs.readFileSync("/var/openfaas/secrets/db-password", "utf-8"),
             port: process.env["db_port"],
-        })
+        };
+        // console.log(poolConf);
+
+        pool = new Pool(poolConf)
     }
 
-    const client = new Client()
-    await client.connect()
-    const res = await client.query(`CREATE TABLE drone-position (
-    positionid        bigint primary key,
-    name              text,
-    location          point,
-    temp_celsius      double presicion not null,
-    created           timestamp with time zone default now()
-);`)
+    await pool.connect()
 
-    console.log(res.rows[0].message) // Hello world!
-    await client.end()
+    try {
+        const res = await pool.query(`CREATE TABLE drone_position (
+        positionid        bigint primary key,
+        name              text,
+        location          point,
+        temp_celsius      double precision not null,
+        created           timestamp with time zone default now()
+    );`)
+        console.log(res)
+    } catch(e) {
+        console.error(e)
+    }
+
+    const insertRes = await pool.query(`insert into drone_position (positionid, name, location, temp_celsius) values (1, 'Drone A', point(1,52), 8.5);`)   
+    console.log(insertRes)
+
+    await pool.end()
 
     context.status(200).succeed("OK");
 }
