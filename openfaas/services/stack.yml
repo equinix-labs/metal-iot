@@ -10,6 +10,9 @@ functions:
     image: ${DOCKER_USER:-alexellis2}/db-inserter:latest
     annotations:
       topic: "drone-position/"
+    environment:
+      db_port: 5432
+      db_name: dronedata
     secrets:
       - db
 
