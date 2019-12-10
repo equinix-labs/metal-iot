@@ -7,12 +7,12 @@ functions:
   db-inserter:
     lang: node12
     handler: ./db-inserter
-    image: ${DOCKER_USER:-alexellis2}/db-inserter:latest
+    image: ${DOCKER_USER:-alexellis2}/db-inserter:0.2.3
     annotations:
       topic: "drone-position/"
     environment:
       db_port: 5432
-      db_name: dronedata
+      db_name: postgres
     secrets:
       - db
 
@@ -23,6 +23,7 @@ functions:
     secrets:
       - db
 
+  # Microservice to render static HTML
   render-map:
     lang: node12
     handler: ./render-map
