@@ -82,23 +82,42 @@ helm template -n openfaas --namespace openfaas mqtt-connector/ --values mqtt
 -connector/values.yaml | kubectl apply -f -
 ```
 
-## TBD/backlog
+## Todo/backlog
 
-* Deploy business insights software
+* Select and deploy business insights software
 * Create Python or Node app to publish generated MQTT data
 * Create Postgesql schema asset for drone geo-location data
+* Create Postgesql schema asset for drone event data that can support the following events
+  * Collision Avoidance
+  * Airspace Violation
+  * Device Health Report
+    * Low Battery
+    * Excessive Battery Usage
+    * Device Fault
 
-* Create OpenFaaS Function: insert row (using `node12` template)
-* Create OpenFaaS service for viewing data on mapbox (using `node12` template)
+* Create OpenFaaS Function: insert geo row (using `node12` template)
+* Create OpenFaaS Function: insert event row (using `node12` template)
+
+* Create OpenFaaS Function: process geo data for collision or airspace (using `go` template (performance boost))
+  * This should detect, log the event, and emit a message back thru mqtt to the violating drones
 * Create OpenFaaS Function: Query drone positions for mapbox (using `node12` template)
+* Create OpenFaaS Function: Query drone events for mapbox (using `node12` template)
+* Create OpenFaaS service for viewing data (mapbox for geo) (using `node12` template)
 
-Suggested schema ('drone'):
+
+Suggested schema ('drone_status'):
 
 * ID 
 * Name
 * Altitude 
 * GPS Latitude
 * GPS Longitude
-* Velocity 
-* Battery 
+* Velocity (sent as a vector)
+* Battery
 * Temperature
+
+Suggested schema ('drone_event'):
+
+* ID 
+* Event Type
+* Data 
