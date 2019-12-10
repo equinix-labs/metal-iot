@@ -83,7 +83,20 @@ helm template -n openfaas --namespace openfaas mqtt-connector/ --values mqtt
 ## TBD/backlog
 
 * Deploy business insights software
-* Create OpenFaaS Function: insert row
-* Create Postgesql schema asset
-* Create OpenFaaS service for viewing data on mapbox
-* Create OpenFaaS Function: Query drone positions for mapbox
+* Create Python or Node app to publish generated MQTT data
+* Create Postgesql schema asset for drone geo-location data
+
+* Create OpenFaaS Function: insert row (using `node12` template)
+* Create OpenFaaS service for viewing data on mapbox (using `node12` template)
+* Create OpenFaaS Function: Query drone positions for mapbox (using `node12` template)
+
+Suggested schema ('drone'):
+
+* ID 
+* Name
+* Altitude 
+* GPS Latitude
+* GPS Longitude
+* Velocity 
+* Battery 
+* Temperature
