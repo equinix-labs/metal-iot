@@ -1,8 +1,24 @@
-# iot
+# Packet Labs IoT workshop
 
-IoT lab
+This workshop deploys compute, storage, networking, and an IoT application to Packet.com.
+
+## Conceptual architecture
+
+Diagram:
+
+TBD via https://draw.io/
+
+Component parts:
+
+* Kubernetes - provisioned with [Terraform](https://www.terraform.io)
+* MQTT Broker - [emitter.io](https://emitter.io)
+* Compute platform - [OpenFaaS](https://github.com/openfaas/faas)
+* MQTT Connector - [openfaas-incubator/mqtt-connector](https://github.com/openfaas-incubator/mqtt-connector)
+* Database/storage - [Postgresql](https://www.postgresql.org)
 
 ## Getting started
+
+Everything you need to deploy this workshop is available in this repository.
 
 ### 1) Clone the repo
 
