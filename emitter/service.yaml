@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: emitter
+  namespace: iot
+spec:
+  type: LoadBalancer
+  selector:
+    app: broker
+    namespace: iot
+  ports:
+    - port: 80
+      targetPort: 8080
+      name: http
+    - port: 443
+      targetPort: 443
+      name: https
