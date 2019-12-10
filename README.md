@@ -56,7 +56,9 @@ You'll need this key to configure the OpenFaaS Connector
 
 ### 5) Install OpenFaaS
 
-* Install [openfaas](/openfaas/)
+* Install [openfaas](/openfaas/) to provide compute and events
+
+* Deploy the [OpenFaaS services](/openfaas/services/) for the application
 
 ### 6) Add the OpenFaaS MQTT-Connector
 

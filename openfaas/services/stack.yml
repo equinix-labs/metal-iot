@@ -1,0 +1,28 @@
+version: 1.0
+provider:
+  name: openfaas
+  gateway: http://127.0.0.1:8080
+
+functions:
+  db-inserter:
+    lang: node12
+    handler: ./db-inserter
+    image: ${DOCKER_USER:-alexellis2}/db-inserter:latest
+    annotations:
+      topic: "drone-position/"
+    secrets:
+      - db
+
+  db-reader:
+    lang: node12
+    handler: ./db-reader
+    image: ${DOCKER_USER:-alexellis2}/db-reader:latest
+    secrets:
+      - db
+
+  render-map:
+    lang: node12
+    handler: ./render-map
+    image: ${DOCKER_USER:-alexellis2}/render-map:latest
+    environment:
+      datasource: "http://gateway.openfaas:8080/function/db-reader"
