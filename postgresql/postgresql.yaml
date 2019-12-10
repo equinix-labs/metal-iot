@@ -1,0 +1,16 @@
+apiVersion: kubedb.com/v1alpha1
+kind: Postgres
+metadata:
+  name: postgres
+  namespace: iot
+spec:
+  version: "11.2"
+  storageType: Durable
+  storage:
+    storageClassName: "csi-packet-standard"
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 1Gi
+  terminationPolicy: DoNotTerminate
