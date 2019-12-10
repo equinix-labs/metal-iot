@@ -10,9 +10,13 @@ IoT lab
 git clone https://github.com/packet-labs/iot
 ```
 
-### 2) Apply Terraform
+### 2) Create a bare-metal Kubernetes cluster
 
-Remember to set your Packet API and project ID before running this step.
+You will need to [install Terraform](https://www.terraform.io) for this step.
+
+* Set your Packet API and project ID in the .tf files in `/k8s`.
+
+* Enter [the `k8s` folder](/k8s/) and apply the terraform plan.
 
 ### 3) Install Postgres via KubeDB and helm
 
@@ -45,7 +49,7 @@ The MQTT-Connector is used to trigger functions and services in response to mess
 The topic is `drone-position`.
 
 ```sh
-git clone //github.com/openfaas-incubator/mqtt-connector
+git clone https://github.com/openfaas-incubator/mqtt-connector
 cd mqtt-connector
 ```
 
