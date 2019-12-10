@@ -26,7 +26,14 @@
 * You will need to create a secret for Postgres with the login information:
 
     ```sh
-    faas-cli secret create db --literal db-username="" --literal db-password="" --literal db-uri=""
+    export USER="postgres"
+    export PASS=""
+    export HOST="postgresql.default.svc.cluster.local"
+
+    kubectl create secret generic -n openfaas-fn db \
+      --from-literal db-username="$USER" \
+      --from-literal db-password="$PASS" \
+      --from-literal db-host="$HOST"
     ```
 
 * Deploy the stack
