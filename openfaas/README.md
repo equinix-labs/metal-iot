@@ -83,7 +83,7 @@ The Docker Hub is the easiest option, for example:
 
 ```sh
 export OPENFAAS_PREFIX="alexellis2"
-docker login --username alexellis2
+docker login --username $OPENFAAS_PREFIX
 
 # List available templates
 faas-cli template store list
@@ -91,14 +91,47 @@ faas-cli template store list
 # Create a Node.js 12 async/await function:
 faas-cli new --lang node12 db-inserter
 
+# We can use one file for all the functions
+mv db-inserter.yml stack.yml
+```
+
+This gives us:
+
+```sh
+├── db-inserter
+│   ├── handler.js
+│   └── package.json
+└── stack.yml
+```
+
+Example of `handler.js`:
+
+```js
+"use strict"
+
+module.exports = async (event, context) => {
+    let err;
+    const result =             {
+        status: "Received input: " + JSON.stringify(event.body)
+    };
+
+    return context
+        .status(200)
+        .succeed(result);
+}
+```
+
+Deploy:
+
+```sh
 # Build / push / deploy
-faas-cli build -f db-insert.yaml
-faas-cli push -f db-insert.yaml
-faas-cli deploy -f db-insert.yaml
+faas-cli build
+faas-cli push
+faas-cli deploy
 
 # Or all-in-one
 
-faas-cli up -f db-insert.yaml
+faas-cli up
 ```
 
 View the function on the OpenFaaS UI or invoke via `faas-cli invoke db-insert`.
