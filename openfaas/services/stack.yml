@@ -7,7 +7,7 @@ functions:
   db-inserter:
     lang: node12
     handler: ./db-inserter
-    image: ${DOCKER_USER:-alexellis2}/db-inserter:0.2.3
+    image: ${DOCKER_USER:-alexellis2}/db-inserter:0.2.7
     annotations:
       topic: "drone-position/"
     environment:

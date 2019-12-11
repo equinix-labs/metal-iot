@@ -13,6 +13,12 @@
         topic: "drone-position/"
     ```
 
+    ```sh
+    curl 127.0.0.1:8080/function/db-inserter \
+    --data '{"name": "Wireguard", "tempCelsius": 8.5, "location": {"lat": 25.6, "lon": 52.4}, "batteryMv": 4800}' \
+    -H "Content-Type: application/json"
+    ```
+
 * db-reader
 
     Reads positions of the drones ingested so far
@@ -36,6 +42,10 @@
       --from-literal db-host="$HOST"
     ```
 
+* Create the schema
+
+Use the `psql` command you got in the Postgres installation step to create the database schema held in the `openfaas/services/schema.sql` file.
+
 * Deploy the stack
 
     ```sh
@@ -55,3 +65,12 @@
 
     faas-cli up
     ```
+
+* Debug
+
+    Did the version not change? Alter `latest` to a version like `0.1.1` for each change.
+
+    Are you not sure what went wrong? Try `faas-cli logs NAME`
+
+    Want to add print statements? Try adding: `console.log("Got here..")`
+
