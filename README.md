@@ -6,7 +6,7 @@ This workshop deploys compute, storage, networking, and an IoT application to Pa
 
 Diagram:
 
-![](/docs/images/conceptual.png)
+![Conceptual architecture](/docs/images/conceptual.png)
 
 Component parts:
 
@@ -16,6 +16,8 @@ Component parts:
 * Compute platform - [OpenFaaS](https://github.com/openfaas/faas)
 * MQTT Connector - [openfaas-incubator/mqtt-connector](https://github.com/openfaas-incubator/mqtt-connector)
 * Database/storage - [Postgresql](https://www.postgresql.org)
+* Docker registry - deployed externally, i.e. the Docker Hub.
+* Ingress Controller - Traefik or Nginx, depending on preference
 
 ## Getting started
 
