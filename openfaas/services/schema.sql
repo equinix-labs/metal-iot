@@ -6,3 +6,10 @@ CREATE TABLE drone_position (
     battery_mv        int not null,
     created           timestamp with time zone default now()
 );
+
+CREATE TABLE drone_event (
+    id                INT GENERATED ALWAYS AS IDENTITY,
+    event_type        text not null,
+    data              text not null,
+    created           timestamp with time zone default now()
+);
