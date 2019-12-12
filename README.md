@@ -97,29 +97,34 @@ Grafana packages a pre-compiled dashboard for OpenFaaS to show metrics like thro
 
 ## Todo/backlog
 
-* Select and deploy business insights software (Metabase / Redash?) - Alan & team
-* Create Python or Node app to publish generated MQTT data - Alan & team
-* Create Postgesql schema asset for drone geo-location data - Alex
-* Create Postgesql schema asset for drone event data that can support the following events (jsonb or string of JSON) - Alex
-  * Collision Avoidance
-  * Airspace Violation
-  * Device Health Report
-    * Low Battery
-    * Excessive Battery Usage
-    * Device Fault
+- [ ] Select deploy business insights software (Metabase / Redash?) - Alan & team
+- [ ] Write deployment instructions for Metabase or Redash - Alan & team
+- [ ] Create Python or Node app to publish generated MQTT data - Alan & team
+- [x] Create Postgesql schema asset for drone geo-location data - Alex
+- [x] Create Postgesql schema asset for drone event data that can support the following events (jsonb or string of JSON) - Alex
 
-* Create OpenFaaS Function: insert geo row (using `node12` template) - Alex
-* Create OpenFaaS Function: insert event row (using `node12` template) - Alan & team 
+* Collision Avoidance
+* Airspace Violation
+* Device Health Report
+* Low Battery
+* Excessive Battery Usage
+* Device Fault
 
-* Create OpenFaaS Function: process geo data for collision or airspace (using `node12` template) - Alan & team
-  * This should detect, log the event, and emit a message back thru mqtt to the violating drones
-* Create OpenFaaS Function: Query drone positions for mapbox (using `node12` template)
-* Create OpenFaaS Function: Query drone events for mapbox (using `node12` template)
-* Create OpenFaaS service for viewing data (mapbox for geo) (using `node12` template) - Alan & team
-    * Static example with OpenStreetMap https://github.com/alexellis/sf-assets
-    * Pure express - https://github.com/openfaas-incubator/node10-express-service
-    * Mix of function/express - https://github.com/openfaas/openfaas-cloud/blob/master/dashboard/of-cloud-dashboard/handler.js
-    * Static example - https://www.openfaas.com/blog/serverless-static-sites/
+- [x] Create OpenFaaS Function: insert geo row (using `node12` template) - Alex
+- [ ] Create OpenFaaS Function: insert event row (using `node12` template) - Alan & team 
+
+- [ ] Create OpenFaaS Function: process geo data for collision or airspace (using `node12` template) - Alan & team
+
+This should detect, log the event, and emit a message back thru mqtt to the violating drones
+
+- [ ] Create OpenFaaS Function: Query drone positions for mapbox (using `node12` template)
+- [ ] Create OpenFaaS Function: Query drone events for mapbox (using `node12` template)
+- [ ] Create OpenFaaS service for viewing data (mapbox for geo) (using `node12` template) - Alan & team
+
+* Static example with OpenStreetMap https://github.com/alexellis/sf-assets
+* Pure express - https://github.com/openfaas-incubator/node10-express-service
+* Mix of function/express - https://github.com/openfaas/openfaas-cloud/blob/master/dashboard/of-cloud-dashboard/handler.js
+* Static example - https://www.openfaas.com/blog/serverless-static-sites/
 
 Suggested schema ('drone_status'):
 
