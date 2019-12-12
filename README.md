@@ -97,9 +97,22 @@ Grafana packages a pre-compiled dashboard for OpenFaaS to show metrics like thro
 
 ## Todo/backlog
 
+Documentation and due dilligence:
+
+- [x] Document: Add k3s Terraform instructions - Cody
+- [x] Document: OpenFaaS deployment - Alex
+- [x] Document: Postgresql lightweight option - Alex
+- [x] Document: K8s: how to get a local KUBECONFIG file - Alex
+- [x] Document: Conceptual architecture diagram - Alex
+- [x] Document: Grafana deployment to visualize functions - Alex
+- [x] Document: Add TLS termination documentation - Alex
 - [ ] Select deploy business insights software (Metabase / Redash?) - Alan & team
 - [ ] Write deployment instructions for Metabase or Redash - Alan & team
+
+Data-feed generation for end-to-end testing:
 - [ ] Create Python or Node app to publish generated MQTT data - Alan & team
+
+Functions / application services:
 - [x] Create Postgesql schema asset for drone geo-location data - Alex
 - [x] Create Postgesql schema asset for drone event data that can support the following events (jsonb or string of JSON) - Alex
 
@@ -117,8 +130,8 @@ Grafana packages a pre-compiled dashboard for OpenFaaS to show metrics like thro
 
 This should detect, log the event, and emit a message back thru mqtt to the violating drones
 
-- [ ] Create OpenFaaS Function: Query drone positions for mapbox (using `node12` template)
-- [ ] Create OpenFaaS Function: Query drone events for mapbox (using `node12` template)
+- [x] Create OpenFaaS Function: Query drone positions for mapbox (using `node12` template)
+- [x] Create OpenFaaS Function: Query drone events for mapbox (using `node12` template)
 - [ ] Create OpenFaaS service for viewing data (mapbox for geo) (using `node12` template) - Alan & team
 
 * Static example with OpenStreetMap https://github.com/alexellis/sf-assets
