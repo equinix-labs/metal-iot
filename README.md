@@ -89,6 +89,12 @@ helm template -n openfaas --namespace openfaas mqtt-connector/ --values mqtt
 -connector/values.yaml | kubectl apply -f -
 ```
 
+### 7) Add Grafana for function/service visualization
+
+Grafana packages a pre-compiled dashboard for OpenFaaS to show metrics like throughput and latency.
+
+* [Deploy and Grafana](/grafana/)
+
 ## Todo/backlog
 
 * Select and deploy business insights software (Metabase / Redash?) - Alan & team
