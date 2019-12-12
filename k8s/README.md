@@ -1,5 +1,5 @@
 # Kubernetes Installation
-These files will allow you to use [Terraform](terraform.io) to deploy a [Kubernetes](kubernetes.io) cluster using [k3s](k3s.io), The certified Kubernetes distribution built for IoT & Edge computing!
+These files will allow you to use [Terraform](http://terraform.io) to deploy a [Kubernetes](http://kubernetes.io) cluster using [k3s](http://k3s.io), The certified Kubernetes distribution built for IoT & Edge computing!
 
 ## Install Terraform
 Terraform is just a single binary.  Visit their [download page](https://www.terraform.io/downloads.html), choose your operating system, make the binary executable, and move it into your path.

@@ -3,7 +3,6 @@ resource "tls_private_key" "ssh_key" {
   rsa_bits = 4096
 }
 
-
 resource "local_file" "priv_key" {
     content = chomp(tls_private_key.ssh_key.private_key_pem)
     filename = "ssh_priv_key"

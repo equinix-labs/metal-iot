@@ -17,3 +17,4 @@ Host *
     StrictHostKeyChecking no
 EOF
 chmod 0400 /root/.ssh/config
+
