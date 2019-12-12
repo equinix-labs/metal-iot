@@ -66,9 +66,9 @@ The commands have changed slightly with Helm 3.x.
 ```
 helm repo add appscode https://charts.appscode.com/stable/
 helm repo update
-helm install kubedb-operator appscode/kubedb --version v0.13.0-rc.0 \
+helm install kubedb-operator appscode/kubedb --version v0.12.0 \
   --namespace kube-system
-helm install kubedb-catalog appscode/kubedb-catalog --version v0.13.0-rc.0 \
+helm install kubedb-catalog appscode/kubedb-catalog --version v0.12.0 \
   --namespace kube-system
 ```
 
