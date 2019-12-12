@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: broker
-  namespace: iot
+  namespace: openfaas
 spec:
   selector:
     matchLabels:
@@ -14,7 +14,7 @@ spec:
       labels:
         app: broker
         role: broker
-        namespace: iot
+        namespace: openfaas
     spec:
       terminationGracePeriodSeconds: 30
       affinity:
@@ -54,7 +54,7 @@ spec:
       name: broker-volume
     spec:
       accessModes: [ "ReadWriteOnce" ]
-      storageClassName: csi-packet-standard
+      storageClassName: local-path
       resources:
         requests:
-          storage: 50Gi
+          storage: 10Gi

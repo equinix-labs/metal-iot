@@ -2,16 +2,16 @@ apiVersion: v1
 kind: Service
 metadata:
   name: emitter
-  namespace: iot
+  namespace: openfaas
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   selector:
     app: broker
-    namespace: iot
+    namespace: openfaas
   ports:
-    - port: 80
+    - port: 8080
       targetPort: 8080
       name: http
-    - port: 443
-      targetPort: 443
+    - port: 8443
+      targetPort: 8443
       name: https

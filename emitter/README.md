@@ -16,23 +16,36 @@ docker logs emitter
 
 Copy the new license into `broker.yaml` and start the broker and service.
 
+For simplicity, the broker is deployed to the `openfaas` namespace.
+
 ```
-kubectl create namespace iot
-kubectl create -f broker.yaml
-kubectl create -f service.yaml
+kubectl apply -f broker.yaml
+kubectl apply -f service.yaml
 ```
 
 List the services to obtain the IP address of the Emitter load balancer.
 
 ```
- % kubectl --namespace iot get service emitter
+ % kubectl --namespace openfaas get service emitter
  NAME      TYPE           CLUSTER-IP       EXTERNAL-IP     PORT(S) AGE
- emitter   LoadBalancer   10.111.110.157   172.217.14.164  80:30790/TCP,443:30705/TCP   8m40s
+ emitter   ClusterIP   10.111.110.157    <pending>  8080:30790/TCP,8443:30705/TCP   8m40s
+```
+
+Check the logs of the service:
+
+```
+kubectl logs statefulset.apps/broker -n openfaas
+```
+
+Port-forward the Emitter's UI so that you can generate a channel key.
+
+```sh
+kubectl port-forward -n openfaas svc emitter 8080:8080 &
 ```
 
 You can now use the IP address to access the Emitter UI. In the above example
-you would go to `http://172.217.14.164/keygen`. From there you can create
+you would go to `http://127.0.0.1:8080/keygen`. From there you can create
 channel keys, which allow you to secure individual channels and start using
 Emitter.
 
-You can now proceed  with the [Emitter documentation](https://github.com/emitter-io/emitter).
+You can now proceed with the [Emitter documentation](https://github.com/emitter-io/emitter).
