@@ -10,6 +10,6 @@ CREATE TABLE drone_position (
 CREATE TABLE drone_event (
     id                INT GENERATED ALWAYS AS IDENTITY,
     event_type        text not null,
-    data              text not null,
+    data              jsonb,
     created           timestamp with time zone default now()
 );
