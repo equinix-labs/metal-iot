@@ -21,7 +21,19 @@
 
 * db-reader
 
-    Reads positions of the drones ingested so far
+    Reads positions and events of the drones ingested so far
+
+    GET `/events` - read the `drone_event` table in JSON
+
+    ```sh
+    curl -s 127.0.0.1:8080/function/db-reader/events
+    ```
+
+    GET `/positions` - read the `drone_position` table in JSON
+
+    ```sh
+    curl -s 127.0.0.1:8080/function/db-reader/positions
+    ```
 
 * render-map
 
@@ -33,18 +45,18 @@
 
     ```sh
     export USER="postgres"
-    export PASS=""
     export HOST="postgresql.default.svc.cluster.local"
+#   export POSTGRES_PASSWORD=""  # Set this value or take it from the earlier step
 
     kubectl create secret generic -n openfaas-fn db \
       --from-literal db-username="$USER" \
-      --from-literal db-password="$PASS" \
+      --from-literal db-password="$POSTGRES_PASSWORD" \
       --from-literal db-host="$HOST"
     ```
 
 * Create the schema
 
-Use the `psql` command you got in the Postgres installation step to create the database schema held in the `openfaas/services/schema.sql` file.
+    Use the `psql` command you got in the Postgres installation step to create the database schema held in the `openfaas/services/schema.sql` file.
 
 * Deploy the stack
 
