@@ -64,3 +64,45 @@ Get_Access = ssh -i ssh_priv_key root@147.75.195.75
 
 You can now login to the first node in the cluster by copy and pasting the ssh command from the output.
 
+Optionally, you can also get access to `kubectl` from your local machine, which is more convenient than logging into the master each time.
+
+Install k3sup
+
+```sh
+curl -SLsf https://get.k3sup.dev | sudo sh
+```
+
+Now fetch the KUBECONFIG to the local directory:
+
+```sh
+k3sup install --ip 147.75.67.211 --user root \
+  --skip-install \
+  --context packet-iot \
+  --ssh-key ./ssh_priv_key
+```
+
+`k3sup` will download an correctly configured KUBECONFIG file to your local directory. 
+
+```sh
+export KUBECONFIG=`pwd`/kubeconfig
+kubectl get node -o wide
+```
+
+You can also merge the config to your local `~/.kube/config` file with:
+
+```sh
+k3sup install --ip 147.75.67.211 --user root \
+  --skip-install \
+  --ssh-key ./ssh_priv_key \
+  --merge \
+  --context packet-iot \
+  --local-path $HOME/.kube/config
+```
+
+See the new context via:
+
+```sh
+kubectl config get-contexts
+
+kubectl config set-contexts NAME
+```
