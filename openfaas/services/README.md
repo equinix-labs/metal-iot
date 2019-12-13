@@ -47,6 +47,48 @@
     curl -s 127.0.0.1:8080/function/db-reader/positions
     ```
 
+    GET `/positions-geojson` - return geoJSON to be used with a feed or external API
+
+    ```
+    curl -s 127.0.0.1:8080/function/db-reader/positions-geojson
+    ```
+
+    ```json
+    {
+        "type": "FeatureCollection",
+        "features": [
+            {
+                "type": "Feature",
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [
+                    -0.2392101,
+                    52.5724835
+                    ]
+                },
+                "properties": {
+                    "title": "Halo",
+                    "icon": "airfield"
+                }
+            },
+            {
+                "type": "Feature",
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [
+                    -0.2400627,
+                    52.5736589
+                    ]
+                },
+                "properties": {
+                    "title": "Market-watch",
+                    "icon": "airfield"
+                }
+            },
+        ]
+    }
+    ```
+
 * render-map
 
     Static webpage assets generated from a webpack build. The webpage is written in React and renders locations from the `db-reader` endpoint using GeoJSON.

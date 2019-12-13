@@ -22,7 +22,7 @@ functions:
   db-reader:
     lang: node12
     handler: ./db-reader
-    image: ${DOCKER_USER:-alexellis2}/db-reader:0.1.4
+    image: ${DOCKER_USER:-alexellis2}/db-reader:0.1.6
     environment:
       db_port: 5432
       db_name: postgres
