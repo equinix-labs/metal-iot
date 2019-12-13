@@ -8,7 +8,7 @@ spec:
     matchLabels:
       app: broker # has to match .spec.template.metadata.labels
   serviceName: "broker"
-  replicas: 3
+  replicas: 3 # Alter to match number of nodes, use "1" for the defaults
   template:
     metadata:
       labels:
@@ -30,7 +30,7 @@ spec:
       containers:
       - env:
         - name: EMITTER_LICENSE
-          value: "RfBEIAngTSCjWuEMrmsFe3qgYTWJiM7N9iZJsRtq8sjrD8OdGJ3QitnOkmzQXMWxFQ1o2nqdn5731Pe4s4PF1rME37CBnwYB:2" # <- Provide license
+          value: "RfBEIFFk0ez8e8hJhBJaY9pq1lSUulKOl99FZzF1Cf_fKfPnGA1tY4lzQeUAYvf2_npUXTx4HDfA9g9pcPi4hqsEjLjQqgwB:2" # <- Provide license
         - name: EMITTER_CLUSTER_SEED
           value: "broker" # or "broker-0.broker.default.svc.cluster.local"
         - name: EMITTER_CLUSTER_ADVERTISE
