@@ -14,9 +14,39 @@ module.exports = async (event, context) => {
             let {rows} = await selectEvents(client);
             client.release()
             return context.status(200).succeed({"status": "OK", "data": rows});
-        } else if(event.path && event.path.indexOf("positions")>-1) {
+        } else if(event.path && (event.path.indexOf("positions")>-1 || event.path.indexOf("positions-geojson")> -1)) {
             let {rows} = await selectPositions(client);
             client.release()
+
+            if(event.path.indexOf("positions-geojson") > -1) {
+                var features = [];
+
+                rows.forEach(l => {
+                    features.push({
+                        'type': 'Feature',
+                        'geometry': {
+                            'type': 'Point',
+                            'coordinates': [
+                                l.location.x,
+                                l.location.y
+                            ]
+                        },
+                        'properties': {
+                            'title': l.name,
+                            "icon": "airfield"
+                            }
+                    });
+                });
+                let payload = {
+                    'type': 'FeatureCollection',
+                    'features': features
+                };
+
+                return context
+                .status(200)
+                .succeed(payload);
+            }
+
             return context.status(200).succeed({"status": "OK", "data": rows});
         }
     }
