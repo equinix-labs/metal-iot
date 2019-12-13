@@ -14,8 +14,20 @@
     ```
 
     ```sh
+
+    # Patrolling the Peterborough Cathedral
     curl 127.0.0.1:8080/function/db-inserter \
-    --data '{"name": "Wireguard", "tempCelsius": 8.5, "location": {"lat": 25.6, "lon": 52.4}, "batteryMv": 4800}' \
+    --data '{"name": "Halo", "tempCelsius": 8.5, "location": {"lat":  52.5724835, "lon": -0.2392101}, "batteryMv": 4800}' \
+    -H "Content-Type: application/json"
+
+    # Patrolling the market
+    curl 127.0.0.1:8080/function/db-inserter \
+    --data '{"name": "Market-watch", "tempCelsius": 8.5, "location": {"lat":  52.5736589, "lon": -0.2400627}, "batteryMv": 4800}' \
+    -H "Content-Type: application/json"
+
+    # Patrolling the outdoor pool
+    curl 127.0.0.1:8080/function/db-inserter \
+    --data '{"name": "Pool-watch", "tempCelsius": 8.5, "location": {"lat":  52.5700276, "lon": -0.2384085}, "batteryMv": 4800}' \
     -H "Content-Type: application/json"
     ```
 
@@ -37,7 +49,11 @@
 
 * render-map
 
-    Static webpage that renders mapbox locations using the `db-reader` endpoint
+    Static webpage assets generated from a webpack build. The webpage is written in React and renders locations from the `db-reader` endpoint using GeoJSON.
+
+    Find out more about [Mapbox GL JS + React](https://blog.mapbox.com/mapbox-gl-js-react-764da6cc074a)
+
+    See also: [render-map README](render-map/)
 
 ### Deployment
 

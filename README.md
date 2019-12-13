@@ -132,7 +132,8 @@ This should detect, log the event, and emit a message back thru mqtt to the viol
 
 - [x] Create OpenFaaS Function: Query drone positions for mapbox (using `node12` template)
 - [x] Create OpenFaaS Function: Query drone events for mapbox (using `node12` template)
-- [ ] Create OpenFaaS service for viewing data (mapbox for geo) (using `node12` template) - Alan & team
+- [x] Create OpenFaaS service for viewing data (mapbox for geo) (using `node12` template) - Alex
+- [ ] Enhance OpenFaaS service for live streaming / positional viewing data (mapbox for geo) (using `node12` template) - Alan & team
 
 * Static example with OpenStreetMap https://github.com/alexellis/sf-assets
 * Pure express - https://github.com/openfaas-incubator/node10-express-service

@@ -22,7 +22,7 @@ functions:
   db-reader:
     lang: node12
     handler: ./db-reader
-    image: ${DOCKER_USER:-alexellis2}/db-reader:0.1.3
+    image: ${DOCKER_USER:-alexellis2}/db-reader:0.1.4
     environment:
       db_port: 5432
       db_name: postgres
@@ -34,11 +34,9 @@ functions:
     
   # Microservice to render static HTML
   render-map:
-    lang: node12
+    lang: dockerfile
     handler: ./render-map
-    image: ${DOCKER_USER:-alexellis2}/render-map:latest
-    environment:
-      datasource: "http://gateway.openfaas:8080/function/db-reader"
+    image: ${DOCKER_USER:-alexellis2}/render-map:0.1.0
     labels:
       com.openfaas.scale.min: 1
       com.openfaas.scale.max: 10
