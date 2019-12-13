@@ -109,7 +109,7 @@ Feel free to try publishing a message:
 
 * Create `publisher.py`
 
-```
+```python
 import paho.mqtt.publish as publish
 import paho.mqtt.client as mqtt
 import os, json
