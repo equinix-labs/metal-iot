@@ -20,7 +20,7 @@ Components exposed with TLS / Ingress or NodePort:
 
 * Ingress Controller - [Traefik v1](https://github.com/containous/traefik) (HostPort 80/443)
 * Serverless compute platform - [OpenFaaS](https://github.com/openfaas/faas)
-* MQTT Broker - [emitter.io](https://emitter.io) (NodePort)
+* MQTT Broker - [emitter.io](https://emitter.io) (NodePort) - 30080/30443
 * Business intelligence - [Metabase](https://www.metabase.com) (Ingress/TLS)
 * Metrics visualization - [Grafana](https://grafana.com) (Ingress/TLS)
 
