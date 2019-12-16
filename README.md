@@ -53,17 +53,17 @@ Create four DNS A records (replace `example.com` with your domain):
 
 > You can register for a domain at [Google Domains](https://domains.google) or [Namecheap.com](https://namecheap.com) for a few dollars. You can also configure your domain there, after purchase.
 
+Some commands will be run from your laptop, so make sure you install Kubectl
+
+* [Install kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
+
 ### 3) Install Postgres via KubeDB and helm
 
 You will need to install helm for this step.
 
 * Install [postgresql](/postgresql/)
 
-### 4) Add the MQTT Broker (Emitter.io)
-
-* Install [emitter](/emitter/)
-
-### 5) Install OpenFaaS
+### 4) Install OpenFaaS
 
 * Install [openfaas](/openfaas/) to provide compute and events
 
@@ -71,7 +71,7 @@ You will need to install helm for this step.
 
 You will also deploy the [schema.sql](/openfaas/services/schema.sql) at this time for `drone_position` and `drone_event`.
 
-### 6) TLS for OpenFaaS
+### 65 TLS for OpenFaaS
 
 * Install cert-manager
 
@@ -97,6 +97,10 @@ You will also deploy the [schema.sql](/openfaas/services/schema.sql) at this tim
     ```sh
     kubectl apply -f ./openfaas/grafana-ingress.yaml
     ```
+
+### 6) Add the MQTT Broker (Emitter.io)
+
+* Install [emitter](/emitter/)
 
 ### 7) Add the OpenFaaS MQTT-Connector
 
