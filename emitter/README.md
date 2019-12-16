@@ -71,3 +71,11 @@ Emitter.
 You will need to enter the secret from above i.e. `aV3hzU01-SCF0wbnDdpXKCyxT4OB5Gad` or similar. If you can't remember the password, then look it up from the Kubernetes secret, and decode it with `kubectl get  secret/emitter-secret -o yaml -n openfaas` followed by `base64 -D` against the `secret` field.
 
 You can now proceed with the [Emitter documentation](https://github.com/emitter-io/emitter).
+
+* Navigate to `http://IP:port/keygen` where `IP` is the address of your Emitter.io deployment
+
+* Generate a channel key for the topic `drone-position`
+
+![](/docs/images/keygen.png)
+
+You'll need this key to configure the OpenFaaS Connector.

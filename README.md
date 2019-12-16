@@ -47,16 +47,6 @@ You will need to install helm for this step.
 
 * Install [emitter](/emitter/)
 
-More info at: https://emitter.io
-
-* Navigate to `http://IP:port/keygen` where `IP` is the address of your Emitter.io deployment
-
-* Generate a channel key for the topic `drone-position`
-
-![](/docs/images/keygen.png)
-
-You'll need this key to configure the OpenFaaS Connector
-
 ### 5) Install OpenFaaS
 
 * Install [openfaas](/openfaas/) to provide compute and events
