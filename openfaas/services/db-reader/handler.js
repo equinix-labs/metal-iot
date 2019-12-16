@@ -61,7 +61,7 @@ async function selectEvents(client) {
 }
 
 async function selectPositions(client) {
-    let res = await client.query(`select * from drone_position;`)
+    let res = await client.query(`select * from get_latest_positions();`)
     return res;
 }
 
