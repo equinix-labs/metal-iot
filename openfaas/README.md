@@ -16,7 +16,19 @@ By changing the URL for a function from /function/NAME to /async-function/NAME a
 
 ## Deployment
 
+### Get the OpenFaaS CLI
+
+> Run this command on your laptop
+
+```sh
+curl -sLS https://cli.openfaas.com | sh
+chmod +x faas-cli
+sudo mv faas-cli /usr/bin/
+```
+
 ### Deploy OpenFaaS with helm3
+
+> Run this command on your laptop
 
 The `k3sup` binary installs OpenFaaS using helm3 and its chart:
 
@@ -27,15 +39,13 @@ curl -sLS https://get.k3sup.dev | sh
 sudo install k3sup /usr/bin/
 ```
 
-* Deploy OpenFaaS with a LoadBalancer
-
-Since the Packet Labs configuration deploys MetalLB, we can create deploy OpenFaaS and expose a LoadBalancer service for the OpenFaaS gateway:
+* Deploy OpenFaaS
 
 ```sh
-k3sup app install openfaas --load-balancer
+k3sup app install openfaas
 ```
 
-Follow the output at the end of the installation to test the deployment.
+Follow the output at the end of the installation to test the deployment, do this from your laptop and not on the remote cluster.
 
 ```sh
 kubectl rollout status -n openfaas deploy/gateway
@@ -44,8 +54,11 @@ kubectl port-forward -n openfaas svc/gateway 8080:8080 &
 # If basic auth is enabled, you can now log into your gateway:
 PASSWORD=$(kubectl get secret -n openfaas basic-auth -o jsonpath="{.data.basic-auth-password}" | base64 --decode; echo)
 echo -n $PASSWORD | faas-cli login --username admin --password-stdin
+```
 
+Now deploy a function from the store and invoke it:
 
+```sh
 faas-cli store list
 faas-cli store deploy nodeinfo
 
@@ -56,28 +69,13 @@ faas-cli describe nodeinfo
 echo verbose | faas-cli invoke nodeinfo
 ```
 
-Now obtain your public endpoint for the OpenFaaS gateway, look for the EXTERNAL-IP:
+### Create your own function (optional)
 
-```sh
-kubectl get svc -n openfaas
-
-NAME                TYPE           CLUSTER-IP       EXTERNAL-IP                                                               PORT(S)          AGE
-gateway-external    LoadBalancer   10.100.71.191    172.217.14.165   8080:31079/TCP   10m
-```
-
-This corresponds to the LoadBalancer created by the helm chart.
-
-### Get the OpenFaaS CLI
-
-```sh
-curl -sLS https://cli.openfaas.com | sh
-chmod +x faas-cli
-sudo mv faas-cli /usr/bin/
-```
-
-### Create your own function
+> Run this command on your laptop
 
 All functions need to be pushed to a registry, whether in-cluster, using a managed product or the Docker Hub.
+
+If you want to follow this part of the lab, you'll need to [install Docker](https://docker.com/) on your laptop
 
 The Docker Hub is the easiest option, for example:
 
