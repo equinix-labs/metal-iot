@@ -1,0 +1,25 @@
+{
+  "name": "node12",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "tsc && node -r esm dist/app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/geodesy": "^2.2.0",
+    "@types/node": "^12.12.18",
+    "dotenv": "^8.2.0",
+    "emitter-io": "^1.39.0",
+    "esm": "^3.2.25",
+    "geodesy": "^2.2.0"
+  },
+  "devDependencies": {
+    "tslint": "^5.20.1",
+    "typescript": "^3.7.3"
+  }
+}
