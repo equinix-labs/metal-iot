@@ -28,6 +28,12 @@ Components exposed with TLS / Ingress or NodePort:
 
 Everything you need to deploy this workshop is available in this repository.
 
+Pre-reqs:
+
+* Install [Docker or Docker Desktop](https://docs.docker.com)
+
+If you cannot install Docker on your own computer, then create an instance on Packet.com and install it there.
+
 ### 1) Clone the repo
 
 ```sh
