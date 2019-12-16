@@ -8,16 +8,21 @@ Diagram:
 
 ![Conceptual architecture](/docs/images/conceptual.png)
 
-Component parts:
+Private components:
 
 * Kubernetes - provisioned with [Terraform](https://www.terraform.io)
 * TLS termination - via [cert-manager](https://cert-manager.io)
-* MQTT Broker - [emitter.io](https://emitter.io)
-* Compute platform - [OpenFaaS](https://github.com/openfaas/faas)
 * MQTT Connector - [openfaas-incubator/mqtt-connector](https://github.com/openfaas-incubator/mqtt-connector)
 * Database/storage - [Postgresql](https://www.postgresql.org)
 * Docker registry - deployed externally, i.e. the Docker Hub.
-* Ingress Controller - Traefik or Nginx, depending on preference
+
+Components exposed with TLS / Ingress or NodePort:
+
+* Ingress Controller - [Traefik v1](https://github.com/containous/traefik) (HostPort 80/443)
+* Serverless compute platform - [OpenFaaS](https://github.com/openfaas/faas)
+* MQTT Broker - [emitter.io](https://emitter.io) (NodePort)
+* Business intelligence - [Metabase](https://www.metabase.com) (Ingress/TLS)
+* Metrics visualization - [Grafana](https://grafana.com) (Ingress/TLS)
 
 ## Getting started
 
