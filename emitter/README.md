@@ -7,17 +7,16 @@
 First run Emitter in docker to generate a `EMITTER_LICENSE`. (Note that this is
 not a software license key.)
 
-```
-docker run -d --name emitter -p 8080:8080 --restart=unless-stopped emitter/server
+```sh
+kubectl run --rm -i -t emitter --image=emitter/server:latest --restart=Never
 ```
 
-List the docker logs to see a randomly generated `EMITTER_LICENSE`.
+Check the logs for a randomly generated `EMITTER_LICENSE`.
 
-```
-docker logs emitter
-2019/12/10 06:40:16 [service] unable to find a license, make sure 'license' value is set in the config file or EMITTER_LICENSE environment variable
-2019/12/10 06:40:16 [license] generated new license: RfBEIAngTSCjWuEMrmsFe3qgYTWJiM7N9iZJsRtq8sjrD8OdGJ3QitnOkmzQXMWxFQ1o2nqdn5731Pe4s4PF1rME37CBnwYB:2
-2019/12/10 06:40:16 [license] generated new secret key: aV3hzU01-SCF0wbnDdpXKCyxT4OB5Gad
+```sh
+2019/12/16 17:56:04 [service] unable to find a license, make sure 'license' value is set in the config file or EMITTER_LICENSE environment variable
+2019/12/16 17:56:04 [license] generated new license: RfBEIF3G-itSQqLXysmRcMJnH35hN4yMPhGKGa6eLFemVpzrGCXxtzccwQuAETuUfulE9TcF1kIOFdEIHrjAopcE8aiipQIB:2
+2019/12/16 17:56:04 [license] generated new secret key: nJH7P9S0k1ILGAoga3cYPCtnPzQdpahi
 ```
 
 * Create a Kubernetes secret to store the key
