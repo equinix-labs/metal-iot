@@ -1,0 +1,21 @@
+apiVersion: extensions/v1beta1 
+kind: Ingress
+metadata:
+  name: grafana
+  namespace: openfaas
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    kubernetes.io/ingress.class: traefik
+spec:
+  rules:
+  - host: grafana.example.com
+    http:
+      paths:
+      - backend:
+          serviceName: grafana
+          servicePort: 3000
+        path: /
+  tls:
+  - hosts:
+    - grafana.example.com
+    secretName: grafana
