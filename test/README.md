@@ -1,18 +1,19 @@
 # Drone Sim
 
 This project simulates clusters of drones delivering packages from warehouses to surrounding areas.  The code has three main modules
-1. hangar - represents an instance of a hangar for storing/recharging drones.  Hangars can deploy drones to warehouses.
-2. warehouse - represents an instance of a warehouse which distributes packages to be delivered in the surrounding region.  Warehouses generate random delivery jobs to drones.
+1. hangar - represents an instance of a hangar for storing/recharging drones.  Hangars can deploy drones to warehouses.  When a drone has low battery it will return to the hangar.
+2. warehouse - represents an instance of a warehouse which distributes packages to be delivered in the surrounding region.  Warehouses hand randomized delivery jobs to drones.
 3. drone - represents a drone which completes deliver jobs.  Drones exhibit semi-realistic flight trajectory and battery drain.  Battery drain is impacted by the size of packages being delivered (payload).
 
 ## Getting Started
-1. Configure the `CHANNEL_KEY_DRONE_POSITION` env variable with the emitter channel key (via OS or .env file)
+1. Configure the emitter host variables along with `CHANNEL_KEY_DRONE_POSITION` env variable with the emitter channel key (via OS or .env file).  `EMITTER_HOST` defaults to `127.0.0.1` if not set.  `EMITTER_PORT` defaults to `8080` if not set.
     ```
     CHANNEL_KEY_DRONE_POSITION=pZtoyNQ_b3WPRc63Br5QJv8CCcP2gfKZ
-    EMITTER_HOST=127.0.0.1
+    EMITTER_HOST=172.23.98.23
     EMITTER_PORT=8080
     ```
-1. Configure the warehouse and hangar initializers in app.ts to relfect your desired behavior.  By default it will deploy 20 drones to two warehouses in north las vegas.
+
+1. Configure the warehouse and hangar initializers in app.ts to relfect your desired behavior.  By default it will deploy 20 drones to two warehouses in north las vegas.  Once the drones deplete their battery they will return to the hangar.
 1. Launch the sim
     ```
     npm i
@@ -47,7 +48,7 @@ this.client.publish({
 });
 ```
 
-## Events
+## Events (TODO)
 
 Events are reported via the `drone-event` channel.
 

@@ -79,7 +79,7 @@ export class Drone {
         this.accel = 0;
 
         if (!process.env.CHANNEL_KEY_DRONE_POSITION) {
-            console.log("Can't connect to ATC - no CHANNEL_KEY_STATUS defined. Drone grounded...")
+            console.log("Can't connect to ATC - no CHANNEL_KEY_DRONE_POSITION defined. Drone grounded...")
             return;
         }
         this.client = connect(broker, () => {
@@ -163,7 +163,7 @@ export class Drone {
 
     private processState() {
         // calculate the new state based on our last state
-        const payload = Math.max(this.jobs.reduce((sum, job) => sum + job.payload, 0), .2);
+        const payload = this.jobs.reduce((sum, job) => sum + job.payload, 0);
         this.battery = Math.max(this.battery - (MAX_PAYLOAD_BATT_DRAIN * payload) - BASE_BATT_DRAIN, .01);
         this.location = this.location.destinationPoint(this.calcDistanceTraveled(1), this.bearing);
         this.bearing = this.location.initialBearingTo(this.dest) || 0;
@@ -173,7 +173,7 @@ export class Drone {
         // tslint:disable-next-line: no-unused-expression
         this.client && this.client.publish({
             channel: "drone-position",
-            key: process.env.CHANNEL_KEY_STATUS || "",
+            key: process.env.CHANNEL_KEY_DRONE_POSITION || "",
             message: JSON.stringify({
                 altitude: this.altitude,
                 batteryPercent: Math.floor(this.battery * 100),
@@ -194,6 +194,14 @@ export class Drone {
         });
 
         // calculate trajectory corrections
+        if (this.battery < LOW_BATT_LEVEL && 
+                0 === this.jobs.length && 
+                this.status === 'traveling' && 
+                this.dest !== this.hangar.location) {
+            // divert to hangar if batteyr gets low while returning to warehouse
+            console.log("%s has low battery, diverting to hangar...", this.name);
+            this.goTo(this.hangar.location);
+        }
         const distToDest = this.location.distanceTo(this.dest); // meters
         const stopDist = this.calcStopDistance();
         // console.log("%d meters to dest, %d needed to stop", distToDest, stopDist);
@@ -220,6 +228,7 @@ export class Drone {
             await new Promise((resolve) => setTimeout(resolve, 1000));
         }
         console.log("%s returned to hangar...", this.name);
+        console.log(this);
     }
 
     private calcDistanceTraveled(time: number) {
