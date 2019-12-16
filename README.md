@@ -42,6 +42,17 @@ You will need to [install Terraform](https://www.terraform.io) for this step.
 
 * Enter [the `k8s` folder](/k8s/) and apply the terraform plan.
 
+* Find the IP of one of the nodes in the cluster from your Packet dashboard or the state file in /k8s/
+
+Create four DNS A records (replace `example.com` with your domain):
+
+* A `gateway.example.com` - IP
+* A `grafana.example.com` - IP
+* A `metabase.example.com` - IP
+* A `emitter.example.com` - IP
+
+> You can register for a domain at [Google Domains](https://domains.google) or [Namecheap.com](https://namecheap.com) for a few dollars. You can also configure your domain there, after purchase.
+
 ### 3) Install Postgres via KubeDB and helm
 
 You will need to install helm for this step.
@@ -75,6 +86,16 @@ You will also deploy the [schema.sql](/openfaas/services/schema.sql) at this tim
     --domain gateway.example.com \
     --email openfaas@example.com \
     --ingress-class traefik
+    ```
+
+* Add TLS for Grafana
+
+    Edit `./openfaas/grafana-ingress.yaml` and edit `grafana.example.com` replacing `example.com` with your domain.
+
+    Now run:
+
+    ```sh
+    kubectl apply -f ./openfaas/grafana-ingress.yaml
     ```
 
 ### 7) Add the OpenFaaS MQTT-Connector
