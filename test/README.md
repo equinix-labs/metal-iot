@@ -67,7 +67,7 @@ this.client.publish({
 ```
 
 ### Event Type: drone_deployed
-Sent when a delivery is picked up from warehouse
+Sent when a drone is deployed from hangar to a warehouse.
 
 ```
 data: {
@@ -79,34 +79,35 @@ data: {
 ```
 
 ### Event Type: drone_grounded
-Sent when a delivery is picked up from warehouse
+Sent when a drone returns to the hangar.
 
 ```
 data: {
-    message: "Drone returned to hangar"
-    name: "dronus maximus"
-    hangar: "Mothership"
+    message: "Drone returned to hangar",
+    name: "dronus maximus",
+    hangar: "Mothership",
 }
 ```
 
 ### Event Type: low_battery
-Sent when battery is low and drone is returning to hangar to recharge
+Sent when battery is low and drone is returning to hangar to recharge.
 
 ```
 data: {
-    name: "dronus maximus"
-    message: "Battery is low, returning to charge"
-    batteryPercent: 19
+    name: "dronus maximus",
+    message: "Battery is low, returning to charge",
+    batteryPercent: 19,
 }
 ```
 
 ### Event Type: package_loaded
-Sent when a delivery is picked up from warehouse
+Sent when a delivery is picked up from warehouse.
 
 ```
 data: {
     name: "dronus maximus"
-    message: "Package has been loaded"
+    message: "Package has been loaded",
+    warehouse: "Newtown Central",
     location: {
         lat: -37.95105,
         lon: 144.42491,
@@ -116,12 +117,13 @@ data: {
 ```
 
 ### Event Type: package_delivered
-Sent when a delivery occurs
+Sent when a delivery occurs.
 
 ```
 data: {
-    name: "dronus maximus"
-    message: "Package has been delivered"
+    name: "dronus maximus",
+    message: "Package has been delivered",
+    warehouse: "Newtown Central",
     location: {
         lat: -37.95105,
         lon: 144.42491,
@@ -133,12 +135,12 @@ data: {
 ```
 
 ### Event Type: system_error
-Sent when a malfunction occurs in the drone
+Sent when a malfunction occurs in the drone.
 
 ```
 data: {
-    name: "dronus maximus"
-    message: "gps sensor error"
+    name: "dronus maximus",
+    message: "gps sensor error",
     location: {
         lat: -37.95105,
         lon: 144.42491,

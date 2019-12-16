@@ -7,11 +7,12 @@ interface Squadron {
 }
 
 export class Hangar {
-
+    public name: string;
     public location: LatLon;
     public drones: Squadron;
 
-    constructor(location: LatLon, droneCount: number) {
+    constructor(name: string, location: LatLon, droneCount: number) {
+        this.name = name;
         this.location = location;
         this.drones = {};
 
