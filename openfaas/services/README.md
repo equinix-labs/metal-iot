@@ -104,7 +104,7 @@
     ```sh
     export USER="postgres"
     export HOST="postgresql.default.svc.cluster.local"
-#   export POSTGRES_PASSWORD=""  # Set this value or take it from the earlier step
+    # export POSTGRES_PASSWORD=""  # Set this value or take it from the earlier step
 
     kubectl create secret generic -n openfaas-fn db \
       --from-literal db-username="$USER" \
