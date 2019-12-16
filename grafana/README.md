@@ -2,20 +2,23 @@
 
 Grafana packages a pre-compiled dashboard for OpenFaaS to show metrics like throughput and latency.
 
-```sh
-kubectl -n openfaas run \
-    --image=stefanprodan/faas-grafana:4.6.3 \
-    --port=3000 \
-    grafana
+* Apply the Deployment for Grafana
 
-kubectl port-forward deploy/grafana -n openfaas 3000:3000
-```
+    ```sh
+    kubectl apply -f ./grafana/deployment.yaml
+    ```
 
-View the dashboard when needed with:
+* Port-forward the dasbhoard to your local computer:
 
-http://127.0.0.1:3000/dashboard/db/openfaas?refresh=5s&orgId=1
+    ```sh
+    kubectl port-forward deploy/grafana -n openfaas 3000:3000
+    ```
 
-The credentials are: admin/admin.
+* View the dashboard when needed with:
+
+    http://127.0.0.1:3000/dashboard/db/openfaas?refresh=5s&orgId=1
+
+    The credentials are: admin/admin.
 
 ### Run a load-test for testing
 
