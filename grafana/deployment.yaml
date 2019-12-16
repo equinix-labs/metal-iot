@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    run: grafana
+  name: grafana
+  namespace: openfaas
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: grafana
+  template:
+    metadata:
+      labels:
+        run: grafana
+    spec:
+      containers:
+      - image: stefanprodan/faas-grafana:4.6.3
+        name: grafana
+        ports:
+        - containerPort: 3000
