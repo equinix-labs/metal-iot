@@ -114,6 +114,10 @@ Grafana packages a pre-compiled dashboard for OpenFaaS to show metrics like thro
 
 * [Deploy and Grafana](/grafana/)
 
+### 9) Send Drone Data
+
+You can now send data to emitter from your drone clients.  Use the [drone simulator](/test/) to generate realistic data for use with visualization tools.
+
 ## Todo/backlog
 
 Documentation and due dilligence:
