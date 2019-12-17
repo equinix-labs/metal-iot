@@ -1,6 +1,6 @@
 ## OpenFaaS Services
 
-### Inventory
+### Overview
 
 * db-inserter
 
@@ -126,7 +126,7 @@
 
     Use `--filter NAME` to deploy only one function at a time
 
-* Rebuild the stack if you want
+* Rebuild the stack if you want (optional)
 
     Use an environment variable to specify your own Docker Hub Account [as per the docs](https://docs.openfaas.com/reference/yaml/#yaml-environment-variable-substitution)
 
@@ -134,6 +134,12 @@
     export DOCKER_USER="some-user"
 
     faas-cli up
+    ```
+
+    You can build a single service at a time with `--filter`
+
+    ```sh
+    faas-cli up --filter db-inserter
     ```
 
 * Debug
