@@ -1,0 +1,6 @@
+dependencies:
+- name: metabase
+  repository: https://kubernetes-charts.storage.googleapis.com
+  version: 0.9.3
+digest: sha256:efe3f176294e497ecf7388cac3b89526387bfffbe98d4367e081863cab318b47
+generated: "2019-12-17T09:48:29.264727-06:00"
