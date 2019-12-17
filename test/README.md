@@ -6,14 +6,15 @@ This project simulates clusters of drones delivering packages from warehouses to
 3. drone - represents a drone which completes deliver jobs.  Drones exhibit semi-realistic flight trajectory and battery drain.  Battery drain is impacted by the size of packages being delivered (payload).
 
 ## Getting Started
-1. Configure the emitter host variables along with `CHANNEL_KEY_DRONE_POSITION` env variable with the emitter channel key (via OS or .env file).  `EMITTER_HOST` defaults to `127.0.0.1` if not set.  `EMITTER_PORT` defaults to `8080` if not set.
+1. Configure the emitter host variables along with emitter channel keys for `drone-position` and `drone-event`(via OS or .env file).  `EMITTER_HOST` defaults to `127.0.0.1` if not set.  `EMITTER_PORT` defaults to `8080` if not set.
     ```
     CHANNEL_KEY_DRONE_POSITION=pZtoyNQ_b3WPRc63Br5QJv8CCcP2gfKZ
+    CHANNEL_KEY_DRONE_EVENT=qlnEY07lFKttkvyZbyzshmiDFPQOo232
     EMITTER_HOST=172.23.98.23
-    EMITTER_PORT=8080
+    EMITTER_PORT=8124
     ```
 
-1. Configure the warehouse and hangar initializers in app.ts to relfect your desired behavior.  By default it will deploy 20 drones to two warehouses in north las vegas.  Once the drones deplete their battery they will return to the hangar.
+1. Configure the warehouse and hangar initializers in app.ts to relfect your desired behavior.  By default it will deploy 30 drones to two warehouses in north las vegas.  Once the drones deplete their battery they will return to the hangar.
 1. Launch the sim
     ```
     npm i
@@ -48,7 +49,7 @@ this.client.publish({
 });
 ```
 
-## Events (TODO)
+## Events
 
 Events are reported via the `drone-event` channel.
 
@@ -67,7 +68,7 @@ this.client.publish({
 ```
 
 ### Event Type: drone_deployed
-Sent when a delivery is picked up from warehouse
+Sent when a drone is deployed from hangar to a warehouse.
 
 ```
 data: {
@@ -79,34 +80,35 @@ data: {
 ```
 
 ### Event Type: drone_grounded
-Sent when a delivery is picked up from warehouse
+Sent when a drone returns to the hangar.
 
 ```
 data: {
-    message: "Drone returned to hangar"
-    name: "dronus maximus"
-    hangar: "Mothership"
+    message: "Drone returned to hangar",
+    name: "dronus maximus",
+    hangar: "Mothership",
 }
 ```
 
 ### Event Type: low_battery
-Sent when battery is low and drone is returning to hangar to recharge
+Sent when battery is low and drone is returning to hangar to recharge.
 
 ```
 data: {
-    name: "dronus maximus"
-    message: "Battery is low, returning to charge"
-    batteryPercent: 19
+    name: "dronus maximus",
+    message: "Battery is low, returning to charge",
+    batteryPercent: 19,
 }
 ```
 
 ### Event Type: package_loaded
-Sent when a delivery is picked up from warehouse
+Sent when a delivery is picked up from warehouse.
 
 ```
 data: {
     name: "dronus maximus"
-    message: "Package has been loaded"
+    message: "Package has been loaded",
+    warehouse: "Newtown Central",
     location: {
         lat: -37.95105,
         lon: 144.42491,
@@ -116,29 +118,30 @@ data: {
 ```
 
 ### Event Type: package_delivered
-Sent when a delivery occurs
+Sent when a delivery occurs.
 
 ```
 data: {
-    name: "dronus maximus"
-    message: "Package has been delivered"
+    name: "dronus maximus",
+    message: "Package has been delivered",
+    warehouse: "Newtown Central",
     location: {
         lat: -37.95105,
         lon: 144.42491,
     },
     distance: 1234,         // meters
     payload: 35,            // percent of capacity
-    batteryConsumed: 8,     // percent
+    batteryConsumed: 8,     // percent of battery consumed during delivery
 }
 ```
 
 ### Event Type: system_error
-Sent when a malfunction occurs in the drone
+Sent when a malfunction occurs in the drone.
 
 ```
 data: {
-    name: "dronus maximus"
-    message: "gps sensor error"
+    name: "dronus maximus",
+    message: "gps sensor error",
     location: {
         lat: -37.95105,
         lon: 144.42491,

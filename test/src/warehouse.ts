@@ -4,14 +4,16 @@ import { Drone } from "./drone";
 export interface Delivery {
     payload: number;
     dest: LatLon;
+    batteryConsumed: number;
 }
 
 export class Warehouse {
-
+    public name: string;
     public location: LatLon;
     public range: number;
 
-    constructor(location: LatLon, serviceRange: number) {
+    constructor(name: string, location: LatLon, serviceRange: number) {
+        this.name = name;
         this.location = location;
         this.range = serviceRange;
     }
@@ -23,6 +25,6 @@ export class Warehouse {
         );
         const payload = Math.random();
         console.log("New Delivery: %d payload to %s", payload, deliveryLocation.toString());
-        return [{dest: deliveryLocation, payload}];
+        return [{dest: deliveryLocation, payload, batteryConsumed: 0}];
     }
 }

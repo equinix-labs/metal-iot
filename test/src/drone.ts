@@ -4,7 +4,7 @@ import { Delivery, Warehouse } from "./warehouse";
 
 const MAX_PAYLOAD_BATT_DRAIN: number = .005;     // max batt drain (%/s) at max payload
 const BASE_BATT_DRAIN: number = .00005;     // max batt drain (%/s) at max payload
-const LOW_BATT_LEVEL: number = .2;
+const LOW_BATT_LEVEL: number = .25;
 
 interface Channel {
     name: "drone-position" | "event";
@@ -84,6 +84,12 @@ export class Drone {
         }
         this.client = connect(broker, () => {
             console.log("%s lifting off", this.name);
+            this.sendEvent('drone_deployed', {
+                message: "Drone now active",
+                name: this.name,
+                hanger: this.hangar.name,
+                warehouse: this.warehouse && this.warehouse.name
+            });
             this.active = true;
             this.run();
         });
@@ -117,10 +123,23 @@ export class Drone {
         this.touchDown(() => {
             console.log("%s delivered package...", this.name);
             const delivery = this.jobs.shift();
-            if (delivery) { this.completed.push(delivery); }
+            if (delivery) { 
+                delivery.batteryConsumed = delivery.batteryConsumed - this.battery;
+                this.completed.push(delivery); 
+                this.sendEvent('package_delivered', {
+                    message: "Package has been delivered",
+                    name: this.name,
+                    warehouse: this.warehouse && this.warehouse.name,
+                    payload: Math.floor(delivery.payload * 100),
+                    location: {
+                        lat: delivery.dest.lat,
+                        lon: delivery.dest.lon,
+                    },
+                    batteryConsumed: Math.floor(delivery.batteryConsumed * 100),
+                });
+            }
         }, () => {
             this.goTo(
-                this.battery < LOW_BATT_LEVEL && this.hangar.location ||
                 this.jobs.length && this.jobs[0].dest ||
                 this.warehouse && this.warehouse.location ||
                 this.hangar.location);
@@ -131,6 +150,20 @@ export class Drone {
         this.touchDown(() => {
             console.log("%s picked up package...", this.name);
             this.jobs = this.warehouse && this.warehouse.pickup() || [];
+            this.jobs.forEach(element => {
+                // save the starting battery level, we'll calculate consumption once we drop
+                element.batteryConsumed = this.battery;
+                this.sendEvent('package_loaded', {
+                    message: "Package has been loaded",
+                    name: this.name,
+                    warehouse: this.warehouse && this.warehouse.name,
+                    payload: Math.floor(element.payload * 100),
+                    location: {
+                        lat: element.dest.lat,
+                        lon: element.dest.lon
+                    }
+                });
+            });
         }, () => {
             this.goTo(
                 this.jobs.length && this.jobs[0].dest ||
@@ -140,6 +173,17 @@ export class Drone {
         });
     }
 
+    private async sendEvent(eventType: string, eventData: object) {
+        // tslint:disable-next-line: no-unused-expression
+        this.client && this.client.publish({
+            channel: "drone-event",
+            key: process.env.CHANNEL_KEY_DRONE_EVENT || "",
+            message: JSON.stringify({
+                type: eventType,
+                data: eventData,
+            }),
+        });
+    }
     private processDest(dest: LatLon) {
         // take action based on where we are
         if (this.status === "traveling") {
@@ -152,9 +196,6 @@ export class Drone {
             } else if (this.hangar.location === dest) {
                 this.status = "charging";
                 this.active = false;
-                // tslint:disable-next-line: no-unused-expression
-                this.client && this.client.disconnect();
-                this.client = null;
             } else {
                 console.log("unhandled destination......");
             }
@@ -198,7 +239,12 @@ export class Drone {
                 0 === this.jobs.length && 
                 this.status === 'traveling' && 
                 this.dest !== this.hangar.location) {
-            // divert to hangar if batteyr gets low while returning to warehouse
+            // divert to hangar if battery gets low while returning to warehouse
+            this.sendEvent('low_battery', {
+                message: "Battery is low, returning to charge",
+                name: this.name,
+                batteryPercent: Math.floor(this.battery * 100),
+            });
             console.log("%s has low battery, diverting to hangar...", this.name);
             this.goTo(this.hangar.location);
         }
@@ -227,8 +273,16 @@ export class Drone {
             // console.log(this);
             await new Promise((resolve) => setTimeout(resolve, 1000));
         }
+        await this.sendEvent('drone_grounded', {
+            message: "Drone returned to hangar",
+            name: this.name,
+            hanger: this.hangar.name
+        });
         console.log("%s returned to hangar...", this.name);
-        console.log(this);
+        // tslint:disable-next-line: no-unused-expression
+        this.client && this.client.disconnect();
+        this.client = null;
+        // console.log(this);
     }
 
     private calcDistanceTraveled(time: number) {
