@@ -26,11 +26,17 @@ The **auth token** can be found using the dropdown at the top right of the scree
 
 The **project id** is a little more hidden. The best way to find this is by being logged into the Packet UI and be on the `SERVERS` section inside the project you want to deploy into. Then copy the UUID after `https://app.packet.net/projects/` in the address bar.
 
+The **node_count** should be set at at least 3, but ideally 5 nodes depending on the size of the dataset to be ingested. 
+
 Once you have collected your variables the easiest way to save them for future uses is by using the special `override.tf` file. You can create this by copy and pasting the following command, (Make sure you replace the `<auth_token>` and `<project_id>` in the command below):
 ```bash
 cat <<EOF >override.tf
 variable "auth_token" {
     default = "<auth_token>"
+}
+
+variable "node_count" {
+    default = "3"
 }
 
 variable "project_id" {

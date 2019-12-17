@@ -55,24 +55,36 @@ export class Map extends React.Component {
                 });
             });
 
+            var baseURL, apiBaseUrl;
+            if (process && process.env && process.env.NODE_ENV === 'development') {
+                baseURL = 'http://localhost:3000';
+                apiBaseUrl = '';
+              } else {
+                baseURL = "";
+                apiBaseUrl = "";
+              }
+       
+            var url = baseURL+ apiBaseUrl + "/function/db-reader/positions-geojson";          
+
             this.map.on('load', () => {
+                var mapp = this.map; 
+                window.setInterval(function() {
+                    mapp.getSource('drone').setData(url);
+                    }, 1500);
+
+                this.map.addSource('drone', { type: 'geojson', data: url });
                 this.map.addLayer({
-                    'id': 'points',
-                    'type': 'symbol',
-                    'source': {
-                    'type': 'geojson',
-                        'data': {
-                            'type': 'FeatureCollection',
-                            'features': this.state.locations,
+                        'id': 'drone',
+                        'type': 'symbol',
+                        'source': 'drone',
+                        'layout': {
+                            'icon-image': 'airfield-11',
+                            // get the title name from the source's "title" property
+                            'text-field': ['get', 'name'],
+                            'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
+                            'text-offset': [0, 0.6],
+                            'text-anchor': 'top'
                             }
-                    },
-                    'layout': {
-                        'icon-image': ['concat', ['get', 'icon'], '-15'],
-                        'text-field': ['get', 'title'],
-                        'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
-                        'text-offset': [0, 0.6],
-                        'text-anchor': 'top'
-                        }
                     });
                 });
                 this.map.on('layeradd', function(e) {

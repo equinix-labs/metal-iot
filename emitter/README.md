@@ -22,7 +22,7 @@ Check the logs for a randomly generated `EMITTER_LICENSE`.
 * Create a Kubernetes secret to store the key
 
 ```sh
-kubectl create secret generic emitter-secret -n openfaas --from-literal "secret=aV3hzU01-SCF0wbnDdpXKCyxT4OB5Gad"
+kubectl create secret generic emitter-secret -n openfaas --from-literal "secret=Oh7CeXiw2r5WGmi3Fef6UNFQL7oI8CAq" -o yaml --dry-run | kubectl apply -f -
 ```
 
 ## Edit `broker.yaml`
@@ -69,12 +69,15 @@ Emitter.
 
 You will need to enter the secret from above i.e. `aV3hzU01-SCF0wbnDdpXKCyxT4OB5Gad` or similar. If you can't remember the password, then look it up from the Kubernetes secret, and decode it with `kubectl get  secret/emitter-secret -o yaml -n openfaas` followed by `base64 -D` against the `secret` field.
 
-You can now proceed with the [Emitter documentation](https://github.com/emitter-io/emitter).
-
 * Navigate to `http://IP:port/keygen` where `IP` is the address of your Emitter.io deployment
 
-* Generate a channel key for the topic `drone-position`
+* Generate a channel key for the `drone-position/` topic
 
 ![](/docs/images/keygen.png)
+
+* Now  generate a second channel key for the `drone-event/` topic
+
+![](/docs/images/keygen-2.png)
+
 
 You'll need this key to configure the OpenFaaS Connector.

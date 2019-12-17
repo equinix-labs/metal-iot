@@ -15,19 +15,19 @@
 
     ```sh
 
-    # Patrolling the Peterborough Cathedral
+    # Delivering candles to the Peterborough Cathedral
     curl 127.0.0.1:8080/function/db-inserter \
-    --data '{"name": "Halo", "tempCelsius": 8.5, "location": {"lat":  52.5724835, "lon": -0.2392101}, "batteryMv": 4800}' \
+    --data '{"name": "Halo", "tempCelsius": 8.5, "location": {"lat":  52.5724835, "lon": -0.2392101}, "destination": {"lat":  52.5724835, "lon": -0.2392101}, "batteryPercent": 80}' \
     -H "Content-Type: application/json"
 
-    # Patrolling the market
+    # Delivering cucumbers to the market
     curl 127.0.0.1:8080/function/db-inserter \
-    --data '{"name": "Market-watch", "tempCelsius": 8.5, "location": {"lat":  52.5736589, "lon": -0.2400627}, "batteryMv": 4800}' \
+    --data '{"name": "Market-watch", "tempCelsius": 8.5, "location": {"lat":  52.5736589, "lon": -0.2400627}, "destination": {"lat":  52.5724835, "lon": -0.2392101}, "batteryPercent": 80}' \
     -H "Content-Type: application/json"
 
-    # Patrolling the outdoor pool
+    # Dropping off ice-cream to the outdoor pool
     curl 127.0.0.1:8080/function/db-inserter \
-    --data '{"name": "Pool-watch", "tempCelsius": 8.5, "location": {"lat":  52.5700276, "lon": -0.2384085}, "batteryMv": 4800}' \
+    --data '{"name": "Pool-watch", "tempCelsius": 8.5, "location": {"lat":  52.5700276, "lon": -0.2384085}, "destination": {"lat":  52.5724835, "lon": -0.2392101}, "batteryPercent": 80}' \
     -H "Content-Type: application/json"
     ```
 

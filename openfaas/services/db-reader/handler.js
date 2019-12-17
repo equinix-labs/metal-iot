@@ -32,7 +32,8 @@ module.exports = async (event, context) => {
                             ]
                         },
                         'properties': {
-                            'title': l.name,
+                            "title": l.name,
+                            "description": l.name,
                             "icon": "airfield"
                             }
                     });

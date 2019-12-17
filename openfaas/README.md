@@ -42,7 +42,9 @@ sudo install k3sup /usr/bin/
 * Deploy OpenFaaS
 
 ```sh
-k3sup app install openfaas
+k3sup app install openfaas \
+  --gateways 2 \
+  --queue-workers 4
 ```
 
 Follow the output at the end of the installation to test the deployment, do this from your laptop and not on the remote cluster.

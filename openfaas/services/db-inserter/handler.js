@@ -7,25 +7,68 @@ const fs = require('fs')
 const pool = initPool()
 
 module.exports = async (event, context) => {  
-    let client = await pool.connect()
-
     if(event.method == "POST") {
-        let {name, location, tempCelsius, batteryMv} = event.body;
-        console.log(name, location, tempCelsius, batteryMv)
-        await insert(client, name, location, tempCelsius, batteryMv);
 
-        client.release()
-        return context.status(200).succeed({"status": "OK"});
-    }
-    
-    client.release()
+        let dataType = getDataType(event.body)
+        // console.log(dataType, event.body);
+
+            if(dataType == "position") {
+                let client = await pool.connect()
+                try {
+                    let {name, location, destination, tempCelsius, batteryPercent} = event.body;
+
+                    let inserted = await insertPosition(client, name, location, destination, tempCelsius, batteryPercent);
+                    console.log("Inserted position - " + inserted.toString() + " row(s)")
+        
+                } finally {
+                    client.release()
+                }
+                return context.status(200).succeed({"status": "OK"});
+            } if(dataType == "event") {
+                let client = await pool.connect()
+
+                try {
+                    let {eventType, data} = event.body;
+                    let inserted = await insertEvent(client, eventType, data);
+                    console.log("Inserted event - " + inserted.toString() + " row(s)"))
+                } finally {
+                    client.release()
+                }
+                return context.status(200).succeed({"status": "OK"});
+            }
+        }
+
     return context.status(200).succeed({"status": "No action"});
 }
 
-async function insert(client, name, location, tempCelsius, batteryMv) {
-    let res = await client.query(`insert into drone_position (name, location, temp_celsius, battery_mv) values ($1, $2, $3, $4);`,
-    [name, new Point(location).toString(), tempCelsius, batteryMv]);
-    console.log(res);
+class Point {
+    constructor(point) {
+        this.lon = point.lon
+        this.lat = point.lat
+    }
+
+    toString() {
+        return "(" + this.lon+"," + this.lat+")"
+    }
+}
+
+function getDataType(body) {
+    if(body.location) {
+        return "position"
+    }
+    return "event"
+}
+
+async function insertPosition(client, name, location, destination, tempCelsius, batteryPercent) {
+    let res = await client.query(`insert into drone_position (name, location, destination, temp_celsius, battery_percent) values ($1, $2, $3, $4, $5);`,
+    [name, new Point(location).toString(), new Point(destination).toString(), tempCelsius, batteryPercent]);
+    return res.rowCount;
+}
+
+async function insertEvent(client, eventType, data) {
+    let res = await client.query(`insert into drone_event (event_type, data) values ($1, $2);`,
+    [eventType, data]);
+    return res.rowCount;
 }
 
 function initPool() {
@@ -36,15 +79,4 @@ function initPool() {
     password: fs.readFileSync("/var/openfaas/secrets/db-password", "utf-8"),
     port: process.env["db_port"],
   });
- }
-
- class Point {
-     constructor(point) {
-         this.lon = point.lon
-         this.lat = point.lat
-     }
-
-     toString() {
-         return "(" + this.lon+"," + this.lat+")"
-     }
  }
