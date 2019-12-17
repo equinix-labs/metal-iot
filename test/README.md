@@ -19,6 +19,10 @@ export CHANNEL_KEY_DRONE_EVENT="qlnEY07lFKttkvyZbyzshmiDFPQOo232"
 Port-forwarding:
 
 ```sh
+kubectl port-forward -n openfaas svc/emitter 8081:8080 &
+```
+
+```sh
 export EMITTER_HOST=127.0.0.1
 export EMITTER_PORT=8081
 ```
