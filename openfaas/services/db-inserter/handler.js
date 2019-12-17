@@ -10,7 +10,7 @@ module.exports = async (event, context) => {
     if(event.method == "POST") {
 
         let dataType = getDataType(event.body)
-        console.log(dataType, event.body);
+        // console.log(dataType, event.body);
 
             if(dataType == "position") {
                 let client = await pool.connect()
