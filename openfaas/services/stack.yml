@@ -7,7 +7,7 @@ functions:
   db-inserter:
     lang: node12
     handler: ./db-inserter
-    image: ${DOCKER_USER:-alexellis2}/db-inserter:0.2.7
+    image: ${DOCKER_USER:-alexellis2}/db-inserter:0.3.4
     annotations:
       topic: "drone-position/"
     environment:
@@ -22,7 +22,7 @@ functions:
   db-reader:
     lang: node12
     handler: ./db-reader
-    image: ${DOCKER_USER:-alexellis2}/db-reader:0.2.0
+    image: ${DOCKER_USER:-alexellis2}/db-reader:0.3.0
     environment:
       db_port: 5432
       db_name: postgres

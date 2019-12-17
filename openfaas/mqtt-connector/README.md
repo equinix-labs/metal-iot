@@ -38,30 +38,7 @@ kubectl logs -n openfaas deployment.apps/openfaas-mqtt-connector -f
 
 Feel free to try publishing a message:
 
-* Create `publisher.py`
-
-```python
-import paho.mqtt.publish as publish
-import paho.mqtt.client as mqtt
-import os, json
-
-def on_publish(client,userdata,result):
-    print("data published \n")
-    pass
-
-client = mqtt.Client("127.0.0.1:8081", transport="websockets")
-
-client.on_publish = on_publish
-broker = "127.0.0.1"
-port = 8081
-
-client.connect(broker, port)
-
-payload = json.dumps({"name": "Carpark-watch", "tempCelsius": 3.5, "location": {"lat": 52.5740072, "lon": -0.2399354}, "batteryMv": 2700})
-
-ret = client.publish(os.getenv("CHANNEL_KEY"), payload)
-print(ret)
-```
+* Make use of `./openfaas/services/publisher.py`
 
 * Make sure the emitter is port-forwarded:
 
@@ -72,6 +49,8 @@ kubectl port-forward -n openfaas svc/emitter 8081:8080
 * Run the publisher
 
 ```sh
+cd ./openfaas/services/
+
 # Install the MQTT broker library
 sudo pip3 install paho-mqtt  # Alternatively use `pip`
 
@@ -83,7 +62,7 @@ python3 ./publisher.py       # Alternatively use `python`
 You should see this message:
 
 ```sh
-2019/12/13 17:07:16 Invoking (http://gateway.openfaas:8080) on topic: "drone-position/", value: "{\"name\": \"Carpark-watch\", \"tempCelsius\": 3.5, \"location\": {\"lat\": 52.5740072, \"lon\": -0.2399354}, \"batteryMv\": 2700}"
+2019/12/13 17:07:16 Invoking (http://gateway.openfaas:8080) on topic: "drone-position/", value: "{\"name\": \"Carpark-watch\", \"tempCelsius\": 3.5, \"location\": {\"lat\": 52.5740072, \"lon\": -0.2399354}, \"batteryPercent\": 80}"
 2019/12/13 17:07:16 Invoke function: db-inserter.openfaas-fn
 [200] drone-position/ => db-inserter.openfaas-fn
 {"status":"OK"}
