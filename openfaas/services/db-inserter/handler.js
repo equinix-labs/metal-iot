@@ -17,7 +17,8 @@ module.exports = async (event, context) => {
                 try {
                     let {name, location, destination, tempCelsius, batteryPercent} = event.body;
 
-                    await insertPosition(client, name, location, destination, tempCelsius, batteryPercent);
+                    let inserted = await insertPosition(client, name, location, destination, tempCelsius, batteryPercent);
+                    console.log("Inserted position" + inserted.toString())
         
                 } finally {
                     client.release()
@@ -28,7 +29,8 @@ module.exports = async (event, context) => {
 
                 try {
                     let {eventType, data} = event.body;
-                    await insertEvent(client, eventType, data);
+                    let inserted = await insertEvent(client, eventType, data);
+                    console.log("Inserted event" + inserted.toString())
                 } finally {
                     client.release()
                 }
@@ -60,13 +62,13 @@ function getDataType(body) {
 async function insertPosition(client, name, location, destination, tempCelsius, batteryPercent) {
     let res = await client.query(`insert into drone_position (name, location, destination, temp_celsius, battery_percent) values ($1, $2, $3, $4, $5);`,
     [name, new Point(location).toString(), new Point(destination).toString(), tempCelsius, batteryPercent]);
-    console.log(res);
+    return res.rowCount;
 }
 
 async function insertEvent(client, eventType, data) {
     let res = await client.query(`insert into drone_event (event_type, data) values ($1, $2);`,
     [eventType, data]);
-    console.log(res);
+    return res.rowCount;
 }
 
 function initPool() {
