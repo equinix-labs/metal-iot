@@ -7,9 +7,9 @@ functions:
   db-inserter:
     lang: node12
     handler: ./db-inserter
-    image: ${DOCKER_USER:-alexellis2}/db-inserter:0.3.5
+    image: ${DOCKER_USER:-alexellis2}/db-inserter:0.3.6
     annotations:
-      topic: "drone-position/"
+      topic: "drone-position/,drone-event/"
     environment:
       db_port: 5432
       db_name: postgres

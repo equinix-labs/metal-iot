@@ -18,7 +18,7 @@ module.exports = async (event, context) => {
                     let {name, location, destination, tempCelsius, batteryPercent} = event.body;
 
                     let inserted = await insertPosition(client, name, location, destination, tempCelsius, batteryPercent);
-                    console.log("Inserted position" + inserted.toString())
+                    console.log("Inserted position - " + inserted.toString() + " row(s)")
         
                 } finally {
                     client.release()
@@ -30,7 +30,7 @@ module.exports = async (event, context) => {
                 try {
                     let {eventType, data} = event.body;
                     let inserted = await insertEvent(client, eventType, data);
-                    console.log("Inserted event" + inserted.toString())
+                    console.log("Inserted event - " + inserted.toString() + " row(s)"))
                 } finally {
                     client.release()
                 }

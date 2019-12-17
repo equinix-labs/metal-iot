@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: emitter
+  name: emitter-external
   namespace: openfaas
 spec:
   type: NodePort
@@ -15,5 +15,23 @@ spec:
       name: http
     - port: 8443
       nodePort: 30443
+      targetPort: 8443
+      name: https
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: emitter
+  namespace: openfaas
+spec:
+  type: ClusterIP
+  selector:
+    app: broker
+    namespace: openfaas
+  ports:
+    - port: 8080
+      targetPort: 8080
+      name: http
+    - port: 8443
       targetPort: 8443
       name: https
