@@ -22,7 +22,7 @@ functions:
   db-reader:
     lang: node12
     handler: ./db-reader
-    image: ${DOCKER_USER:-alexellis2}/db-reader:0.3.0
+    image: ${DOCKER_USER:-alexellis2}/db-reader:0.3.1
     environment:
       db_port: 5432
       db_name: postgres
@@ -36,7 +36,7 @@ functions:
   render-map:
     lang: dockerfile
     handler: ./render-map
-    image: ${DOCKER_USER:-alexellis2}/render-map:0.1.0
+    image: ${DOCKER_USER:-alexellis2}/render-map:0.2.0
     labels:
       com.openfaas.scale.min: 1
       com.openfaas.scale.max: 10
