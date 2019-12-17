@@ -6,14 +6,15 @@ This project simulates clusters of drones delivering packages from warehouses to
 3. drone - represents a drone which completes deliver jobs.  Drones exhibit semi-realistic flight trajectory and battery drain.  Battery drain is impacted by the size of packages being delivered (payload).
 
 ## Getting Started
-1. Configure the emitter host variables along with `CHANNEL_KEY_DRONE_POSITION` env variable with the emitter channel key (via OS or .env file).  `EMITTER_HOST` defaults to `127.0.0.1` if not set.  `EMITTER_PORT` defaults to `8080` if not set.
+1. Configure the emitter host variables along with emitter channel keys for `drone-position` and `drone-event`(via OS or .env file).  `EMITTER_HOST` defaults to `127.0.0.1` if not set.  `EMITTER_PORT` defaults to `8080` if not set.
     ```
     CHANNEL_KEY_DRONE_POSITION=pZtoyNQ_b3WPRc63Br5QJv8CCcP2gfKZ
+    CHANNEL_KEY_DRONE_EVENT=qlnEY07lFKttkvyZbyzshmiDFPQOo232
     EMITTER_HOST=172.23.98.23
-    EMITTER_PORT=8080
+    EMITTER_PORT=8124
     ```
 
-1. Configure the warehouse and hangar initializers in app.ts to relfect your desired behavior.  By default it will deploy 20 drones to two warehouses in north las vegas.  Once the drones deplete their battery they will return to the hangar.
+1. Configure the warehouse and hangar initializers in app.ts to relfect your desired behavior.  By default it will deploy 30 drones to two warehouses in north las vegas.  Once the drones deplete their battery they will return to the hangar.
 1. Launch the sim
     ```
     npm i
@@ -48,7 +49,7 @@ this.client.publish({
 });
 ```
 
-## Events (TODO)
+## Events
 
 Events are reported via the `drone-event` channel.
 
@@ -130,7 +131,7 @@ data: {
     },
     distance: 1234,         // meters
     payload: 35,            // percent of capacity
-    batteryConsumed: 8,     // percent
+    batteryConsumed: 8,     // percent of battery consumed during delivery
 }
 ```
 

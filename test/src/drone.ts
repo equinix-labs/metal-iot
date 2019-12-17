@@ -4,7 +4,7 @@ import { Delivery, Warehouse } from "./warehouse";
 
 const MAX_PAYLOAD_BATT_DRAIN: number = .005;     // max batt drain (%/s) at max payload
 const BASE_BATT_DRAIN: number = .00005;     // max batt drain (%/s) at max payload
-const LOW_BATT_LEVEL: number = .2;
+const LOW_BATT_LEVEL: number = .25;
 
 interface Channel {
     name: "drone-position" | "event";
@@ -130,12 +130,12 @@ export class Drone {
                     message: "Package has been delivered",
                     name: this.name,
                     warehouse: this.warehouse && this.warehouse.name,
-                    payload: delivery.payload,
+                    payload: Math.floor(delivery.payload * 100),
                     location: {
                         lat: delivery.dest.lat,
                         lon: delivery.dest.lon,
                     },
-                    batteryConsumed: delivery.batteryConsumed,
+                    batteryConsumed: Math.floor(delivery.batteryConsumed * 100),
                 });
             }
         }, () => {
@@ -157,7 +157,7 @@ export class Drone {
                     message: "Package has been loaded",
                     name: this.name,
                     warehouse: this.warehouse && this.warehouse.name,
-                    payload: element.payload,
+                    payload: Math.floor(element.payload * 100),
                     location: {
                         lat: element.dest.lat,
                         lon: element.dest.lon
@@ -196,9 +196,6 @@ export class Drone {
             } else if (this.hangar.location === dest) {
                 this.status = "charging";
                 this.active = false;
-                // tslint:disable-next-line: no-unused-expression
-                this.client && this.client.disconnect();
-                this.client = null;
             } else {
                 console.log("unhandled destination......");
             }
@@ -276,13 +273,16 @@ export class Drone {
             // console.log(this);
             await new Promise((resolve) => setTimeout(resolve, 1000));
         }
-        this.sendEvent('drone_grounded', {
+        await this.sendEvent('drone_grounded', {
             message: "Drone returned to hangar",
             name: this.name,
             hanger: this.hangar.name
         });
         console.log("%s returned to hangar...", this.name);
-        console.log(this);
+        // tslint:disable-next-line: no-unused-expression
+        this.client && this.client.disconnect();
+        this.client = null;
+        // console.log(this);
     }
 
     private calcDistanceTraveled(time: number) {
