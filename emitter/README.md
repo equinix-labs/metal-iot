@@ -1,3 +1,9 @@
+## Emitter.io
+
+[Emitter.io](https://emitter.io) is a MQTT broker with additional security provided via channel keys.
+
+## Get started
+
 First run Emitter in docker to generate a `EMITTER_LICENSE`. (Note that this is
 not a software license key.)
 
@@ -14,7 +20,17 @@ docker logs emitter
 2019/12/10 06:40:16 [license] generated new secret key: aV3hzU01-SCF0wbnDdpXKCyxT4OB5Gad
 ```
 
-Copy the new license into `broker.yaml` and start the broker and service.
+* Create a Kubernetes secret to store the key
+
+```sh
+kubectl create secret generic emitter-secret -n openfaas --from-literal "secret=aV3hzU01-SCF0wbnDdpXKCyxT4OB5Gad"
+```
+
+## Edit `broker.yaml`
+
+* Copy the new license into `broker.yaml` and start the broker and service.
+
+## Deploy
 
 For simplicity, the broker is deployed to the `openfaas` namespace.
 
@@ -23,13 +39,7 @@ kubectl apply -f broker.yaml
 kubectl apply -f service.yaml
 ```
 
-List the services to obtain the IP address of the Emitter load balancer.
-
-```
- % kubectl --namespace openfaas get service emitter
- NAME      TYPE           CLUSTER-IP       EXTERNAL-IP     PORT(S) AGE
- emitter   ClusterIP   10.111.110.157    <pending>  8080:30790/TCP,8443:30705/TCP   8m40s
-```
+## Check the deployment
 
 Check the logs of the service:
 
@@ -37,15 +47,20 @@ Check the logs of the service:
 kubectl logs statefulset.apps/broker -n openfaas
 ```
 
-Port-forward the Emitter's UI so that you can generate a channel key.
 
-```sh
-kubectl port-forward -n openfaas svc emitter 8080:8080 &
+You can now visit the `emitter` subdomain of your domain to view the Emitter
+keygen UI, i.e. `https://emitter.example.com/keygen`.
+
+Alternatively, if you've not setup a domain name for the workshop, then you can
+view the Metabase UI using Kubernetes port forwarding.
+
+```
+export POD_NAME=$(kubectl get pods --namespace default -l "app=emitter,release=metabase" -o jsonpath="{.items[0].metadata.name}")
+kubectl port-forward --namespace default $POD_NAME 8080:80
 ```
 
-You can now use the IP address to access the Emitter UI. In the above example
-you would go to `http://127.0.0.1:8080/keygen`. From there you can create
-channel keys, which allow you to secure individual channels and start using
-Emitter.
+Visit http://127.0.0.1:8080/keygen to view the Emitter keygen UI.
 
-You can now proceed with the [Emitter documentation](https://github.com/emitter-io/emitter).
+## MQTT Endpoint
+
+TK Certificate for termination?
