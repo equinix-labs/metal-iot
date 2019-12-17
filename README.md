@@ -30,6 +30,8 @@ Everything you need to deploy this workshop is available in this repository.
 
 > Note: This repository is designed to be used with your own domain name and a number of DNS records. This enables TLS termination (HTTPS) to be used for exposed services. If you are working in development, you can skip the domain and TLS steps. 
 
+> You can register for a domain at [Google Domains](https://domains.google) or [Namecheap.com](https://namecheap.com) for a few dollars. You can also configure your domain there, after purchase.
+
 ### 1) Clone the repo
 
 ```sh
@@ -52,8 +54,6 @@ Create four DNS A records (replace `example.com` with your domain):
 * A `grafana.example.com` - IP
 * A `metabase.example.com` - IP
 * A `emitter.example.com` - IP
-
-> You can register for a domain at [Google Domains](https://domains.google) or [Namecheap.com](https://namecheap.com) for a few dollars. You can also configure your domain there, after purchase.
 
 Some commands will be run from your laptop, so make sure you install Kubectl
 
