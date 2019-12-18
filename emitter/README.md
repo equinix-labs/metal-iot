@@ -15,14 +15,14 @@ Check the logs for a randomly generated `EMITTER_LICENSE`.
 
 ```sh
 2019/12/16 17:56:04 [service] unable to find a license, make sure 'license' value is set in the config file or EMITTER_LICENSE environment variable
-2019/12/16 17:56:04 [license] generated new license: RfBEIF3G-itSQqLXysmRcMJnH35hN4yMPhGKGa6eLFemVpzrGCXxtzccwQuAETuUfulE9TcF1kIOFdEIHrjAopcE8aiipQIB:2
-2019/12/16 17:56:04 [license] generated new secret key: nJH7P9S0k1ILGAoga3cYPCtnPzQdpahi
+2019/12/16 17:56:04 [license] generated new license: RfBEIGQlQNSLQfIlm-b4s-TNJirEjMhJu7rGA5FJW8BTMFTTGADk2MX9Tq0AaT_20-of7cDM-clmRbb7Z-n5itgHubSCgwcB:2
+2019/12/16 17:56:04 [license] generated new secret key: 2EXofPVkJJq7GEoQkFHN3B_P63Y4DoX_
 ```
 
 * Create a Kubernetes secret to store the key
 
 ```sh
-kubectl create secret generic emitter-secret -n openfaas --from-literal "secret=Oh7CeXiw2r5WGmi3Fef6UNFQL7oI8CAq" -o yaml --dry-run | kubectl apply -f -
+kubectl create secret generic emitter-secret -n openfaas --from-literal "secret=2EXofPVkJJq7GEoQkFHN3B_P63Y4DoX_" -o yaml --dry-run | kubectl apply -f -
 ```
 
 ## Edit `broker.yaml`

@@ -8,7 +8,7 @@ spec:
     matchLabels:
       app: broker # has to match .spec.template.metadata.labels
   serviceName: "broker"
-  replicas: 3 # Alter to match number of nodes, use "1" for the defaults
+  replicas: 1 # Alter to match number of nodes, use "1" for the defaults
   template:
     metadata:
       labels:
@@ -29,8 +29,8 @@ spec:
             topologyKey: kubernetes.io/hostname
       containers:
       - env:
-        - name: EMITTER_LICENSE
-          value: "RfBEIMPMTdtO78jDIBOlxitjbq4KFfdXKigCyS90v1SVjN06GGPcnVqJ29MxZAe9qhvt_CVJ2Uj15XT52sac-NMCn66JrwgB:2" # <- Provide license
+        - name: EMITTER_LICENSE  # <- Provide license
+          value: "RfBEIGQlQNSLQfIlm-b4s-TNJirEjMhJu7rGA5FJW8BTMFTTGADk2MX9Tq0AaT_20-of7cDM-clmRbb7Z-n5itgHubSCgwcB:2"
         - name: EMITTER_CLUSTER_SEED
           value: "broker" # or "broker-0.broker.default.svc.cluster.local"
         - name: EMITTER_CLUSTER_ADVERTISE

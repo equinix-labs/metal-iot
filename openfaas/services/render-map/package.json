@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "proxy": "http://localhost:8080",
-  "homepage": "http://127.0.0.1:8080/function/map-viewer/",
+  "homepage": "http://127.0.0.1:8080/function/render-map/",
   "dependencies": {
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.3",
