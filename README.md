@@ -42,7 +42,7 @@ git clone https://github.com/packet-labs/iot
 
 You will need to [install Terraform](https://www.terraform.io) for this step.
 
-* Set your Packet API and project ID in the .tf files in `/k8s`.
+* Set your Packet API and project ID in a terraform.tfvars file in `/k8s`.
 
 * Enter [the `k8s` folder](/k8s/) and apply the terraform plan.
 

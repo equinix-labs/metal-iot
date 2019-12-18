@@ -28,20 +28,13 @@ The **project id** is a little more hidden. The best way to find this is by bein
 
 The **node_count** should be set at at least 3, but ideally 5 nodes depending on the size of the dataset to be ingested. 
 
-Once you have collected your variables the easiest way to save them for future uses is by using the special `override.tf` file. You can create this by copy and pasting the following command, (Make sure you replace the `<auth_token>` and `<project_id>` in the command below):
+Once you have collected your variables the easiest way to save them for future uses is by using the special `terraform.tfvars` file. You can create this by copy and pasting the following command, (Make sure you replace the `<auth_token>` and `<project_id>` in the command below):
+
 ```bash
-cat <<EOF >override.tf
-variable "auth_token" {
-    default = "<auth_token>"
-}
-
-variable "node_count" {
-    default = "3"
-}
-
-variable "project_id" {
-    default = "<project_id>"
-}
+cat <<EOF >terraform.tfvars
+auth_token = "<auth_token>"
+node_count = "3"
+project_id = "<project_id>"
 EOF
 ```
 
@@ -75,7 +68,7 @@ curl -SLsf https://get.k3sup.dev | sudo sh
 Now fetch the KUBECONFIG to the local directory:
 
 ```sh
-export IP=147.75.67.211
+export IP=147.75.195.75
 k3sup install --ip $IP --user root \
   --skip-install \
   --context packet-iot \
