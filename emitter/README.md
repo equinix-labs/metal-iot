@@ -25,20 +25,20 @@ Check the logs for a randomly generated `EMITTER_LICENSE`.
 kubectl create secret generic emitter-secret -n openfaas --from-literal "secret=2EXofPVkJJq7GEoQkFHN3B_P63Y4DoX_" -o yaml --dry-run | kubectl apply -f -
 ```
 
-## Edit `broker.yaml`
+## Edit `broker.yaml` and deploy
 
-* Copy the new license into `broker.yaml` and start the broker and service.
+* Copy the new license into `broker.yaml`
 
 * Update `replicas: 3` with the number of nodes, use "1" for the default
 
-## Deploy
+    For simplicity, the broker is deployed to the `openfaas` namespace.
 
-For simplicity, the broker is deployed to the `openfaas` namespace.
+    Run these commands:
 
-```
-kubectl apply -f broker.yaml
-kubectl apply -f service.yaml
-```
+    ```sh
+    kubectl apply -f broker.yaml
+    kubectl apply -f service.yaml
+    ```
 
 ## Check the deployment
 
