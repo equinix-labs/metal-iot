@@ -15,7 +15,7 @@ resource "null_resource" "install_k3s" {
         type = "ssh"
         user = "root"
         private_key = chomp(tls_private_key.ssh_key.private_key_pem)
-        host = packet_device.k3s_nodes[0].access_public_ipv4
+        host = packet_device.k3s_nodes[count.index].access_public_ipv4
     }
 
     provisioner "file" {
