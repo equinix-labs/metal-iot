@@ -1,0 +1,21 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    kubernetes.io/ingress.class: traefik
+  name: pgadmin
+  namespace: openfaas
+spec:
+  rules:
+  - host: pgadmin.{{ .Values.domain }}
+    http:
+      paths:
+      - backend:
+          serviceName: pgadmin
+          servicePort: 80
+        path: /
+  tls:
+  - hosts:
+    - pgadmin.{{ .Values.domain }}
+    secretName: pgadmin-ingress
