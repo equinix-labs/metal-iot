@@ -135,7 +135,7 @@ Documentation and due dilligence:
 - [ ] Write deployment instructions for Metabase or Redash - Alan & team
 
 Data-feed generation for end-to-end testing:
-- [ ] Create Python or Node app to publish generated MQTT data - Alan & team
+- [x] Create Python or Node app to publish generated MQTT data - Alan & team
 
 Functions / application services:
 - [x] Create Postgesql schema asset for drone geo-location data - Alex
@@ -149,7 +149,7 @@ Functions / application services:
 * Device Fault
 
 - [x] Create OpenFaaS Function: insert geo row (using `node12` template) - Alex
-- [ ] Create OpenFaaS Function: insert event row (using `node12` template) - Alan & team 
+- [x] Create OpenFaaS Function: insert event row (using `node12` template) - Alan & team 
 
 - [ ] Create OpenFaaS Function: process geo data for collision or airspace (using `node12` template) - Alan & team
 
