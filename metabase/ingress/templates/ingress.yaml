@@ -1,0 +1,21 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    kubernetes.io/ingress.class: traefik
+  name: metabase
+  namespace: openfaas
+spec:
+  rules:
+  - host: metabase.{{ .Values.domain }}
+    http:
+      paths:
+      - backend:
+          serviceName: metabase-metabase
+          servicePort: 80
+        path: /
+  tls:
+  - hosts:
+    - metabase.{{ .Values.domain }}
+    secretName: metabase-ingress
