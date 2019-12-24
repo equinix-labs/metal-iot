@@ -14,7 +14,7 @@ if (!process.env.CHANNEL_KEY_DRONE_POSITION || ! process.env.CHANNEL_KEY_DRONE_E
 }
 
 console.log("deploying drones...");
-const drones = Object.keys(hang.drones)
+const drones = Object.keys(hang.drones);
 
 const deployer = setInterval(() => {
     const id = drones.pop();
