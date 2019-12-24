@@ -179,7 +179,7 @@ export class Drone {
             channel: "drone-event",
             key: process.env.CHANNEL_KEY_DRONE_EVENT || "",
             message: JSON.stringify({
-                eventType: eventType,
+                type: eventType,
                 data: eventData,
             }),
         });
