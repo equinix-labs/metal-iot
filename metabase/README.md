@@ -13,7 +13,7 @@ You can now install Metabase from the `stable` Helm repository.
 ```
 helm repo add stable https://kubernetes-charts.storage.googleapis.com
 helm repo update
-helm install metabase stable/metabase --namespace openfaas
+helm install metabase stable/metabase --name metabase --namespace openfaas
 ```
 
 Install the Metabase ingress controller using Helm from this local repository.

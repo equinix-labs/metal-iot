@@ -10,7 +10,7 @@ module.exports = async (event, context) => {
     if(event.method == "POST") {
 
         let dataType = getDataType(event.body)
-        // console.log(dataType, event.body);
+            process.stderr.write('error message\n')
 
             if(dataType == "position") {
                 let client = await pool.connect()
@@ -18,7 +18,7 @@ module.exports = async (event, context) => {
                     let {name, location, destination, tempCelsius, batteryPercent} = event.body;
 
                     let inserted = await insertPosition(client, name, location, destination, tempCelsius, batteryPercent);
-                    console.log("Inserted position - " + inserted.toString() + " row(s)")
+//                    console.error("Inserted position - " + inserted.toString() + " row(s)")
         
                 } finally {
                     client.release()
@@ -28,9 +28,10 @@ module.exports = async (event, context) => {
                 let client = await pool.connect()
 
                 try {
-                    let {eventType, data} = event.body;
-                    let inserted = await insertEvent(client, eventType, data);
-                    console.log("Inserted event - " + inserted.toString() + " row(s)")
+                    console.log(event.body)
+                    let {type, data} = event.body;
+                    let inserted = await insertEvent(client, type, data);
+                    console.error("Inserted event - " + inserted.toString() + " row(s)")
                 } finally {
                     client.release()
                 }
@@ -66,8 +67,11 @@ async function insertPosition(client, name, location, destination, tempCelsius, 
 }
 
 async function insertEvent(client, eventType, data) {
-    let res = await client.query(`insert into drone_event (event_type, data) values ($1, $2);`,
-    [eventType, data]);
+    console.error('event', eventType, data)
+    const { message, name, hanger, warehouse } = data
+    let res = await client.query(`insert into drone_event (
+        event_type, message, name, hangar, warehouse
+    ) values ($1, $2, $3, $4, $5);`, [eventType, message, name, hanger, warehouse]);
     return res.rowCount;
 }
 

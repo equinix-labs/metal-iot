@@ -17,7 +17,7 @@ Install the PgAdmin service using Helm replacing example.com with the domain
 name of your service.
 
 ```
-helm install pgadmin ./ --set domain=example.com --namespace openfaas
+helm install --name pgadmin --set domain=example.com --namespace openfaas pgadmin/chart
 ```
 
 Obtain the login password. The user name is admin.

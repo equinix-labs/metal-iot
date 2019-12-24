@@ -2,5 +2,5 @@
 /kubeconfig
 /override.tf
 /ssh_priv_key
-terraform.tfstate
+terraform.tfstate*
 
