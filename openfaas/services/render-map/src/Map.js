@@ -37,54 +37,160 @@ export class Map extends React.Component {
         });
 
         this.map.on('load', () => {
-            var mapp = this.map;
             window.setInterval(function() {
-                mapp.getSource('drone').setData(url);
-                }, 1500);
+                this.map.getSource('drones').setData(url);
+            }.bind(this), 1500);
 
-            this.map.addSource('drone', { type: 'geojson', data: url });
-            this.map.addLayer({
-                    'id': 'drone',
-                    'type': 'symbol',
-                    'source': 'drone',
-                    'layout': {
-                        'icon-image': 'airfield-11',
-                        // get the title name from the source's "title" property
-                        'text-field': ['get', 'title'],
-                        'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
-                        'text-offset': [0, 0.6],
-                        'text-anchor': 'top'
-                        // "icon-allow-overlap": true,
-                        // "icon-ignore-placement": true,
-                        // 'text-allow-overlap': true
-                        }
-                });
+            this.map.addSource('drones', {
+                type: 'geojson',
+                data: url,
+                // cluster: true
             });
+
+            this.map.addLayer({
+              'id': 'hangar',
+              'type': 'symbol',
+              'source': {
+                'type': 'geojson',
+                'data': {
+                  'type': 'FeatureCollection',
+                  'features': [
+                    {
+                      'type': 'Feature',
+                      'geometry': {
+                        'type': 'Point',
+                        'coordinates': [-115.164221, 36.264869]
+                      }
+                    }
+                  ]
+                }
+              },
+              'layout': {
+                'icon-image': 'castle-11',
+                'text-field': 'Hangar',
+                'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
+                'text-offset': [0, 0.6],
+                'text-anchor': 'top',
+                'icon-allow-overlap': true,
+                'text-allow-overlap': true,
+                'icon-ignore-placement': true
+              }
+            })
+
+            this.map.addLayer({
+              'id': 'warehouses',
+              'type': 'symbol',
+              'source': {
+                'type': 'geojson',
+                'data': {
+                  'type': 'FeatureCollection',
+                  'features': [
+                    {
+                      'type': 'Feature',
+                      'geometry': {
+                        'type': 'Point',
+                        'coordinates': [-115.124846, 36.250648]
+                      }
+                    },
+                    {
+                      'type': 'Feature',
+                      'geometry': {
+                        'type': 'Point',
+                        'coordinates': [-115.290328, 36.246499]
+                      }
+                    }
+                  ]
+                }
+              },
+              'layout': {
+                'icon-image': 'castle-11',
+                'text-field': 'Warehouse',
+                'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
+                'text-offset': [0, 0.6],
+                'text-anchor': 'top',
+                'icon-allow-overlap': true,
+                'text-allow-overlap': true
+              }
+            })
+
+            this.map.addLayer({
+                'id': 'drone',
+                'type': 'symbol',
+                'source': 'drones',
+                'layout': {
+                    'icon-image': 'airfield-11',
+                    // get the title name from the source's "title" property
+                    'text-field': ['get', 'title'],
+                    'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
+                    'text-offset': [0, 0.6],
+                    'text-anchor': 'top',
+                    'icon-allow-overlap': true,
+                    'icon-optional': true,
+                    'text-allow-overlap': true,
+                    'icon-ignore-placement': true
+                }
+            });
+
+            /*
+            this.map.addLayer({
+                'id': 'cluster',
+                'type': 'circle',
+                'source': 'drones',
+                'filter': ['has', 'point_count'],
+                'paint': {
+                    'circle-color': '#ffffff',
+                    'circle-opacity': 0.5,
+                    'circle-radius': [
+                        'step',
+                        ['get', 'point_count'],
+                        10,
+                        2,
+                        10,
+                        4,
+                        20
+                    ]
+                }
+            });
+
+            this.map.addLayer({
+                id: 'cluster-count',
+                type: 'symbol',
+                source: 'drones',
+                filter: ['has', 'point_count'],
+                layout: {
+                    'text-field': '{point_count_abbreviated}',
+                    'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+                    'text-size': 12
+                }
+            });
+            */
+
             this.map.on('layeradd', function(e) {
                 var marker = e.layer,
-                feature = marker.feature;
+                    feature = marker.feature;
                 marker.setIcon(this.map.icon(feature.properties.icon));
-        });
+            });
 
-        this.map.on('move', () => {
-            this.setState({
-                lng: this.map.getCenter().lng.toFixed(4),
-                lat: this.map.getCenter().lat.toFixed(4),
-                zoom: this.map.getZoom().toFixed(2)
+            this.map.on('move', () => {
+                this.setState({
+                    lng: this.map.getCenter().lng.toFixed(4),
+                    lat: this.map.getCenter().lat.toFixed(4),
+                    zoom: this.map.getZoom().toFixed(2)
                 });
             });
+        });
     }
-  
+
     componentWillUnmount() {
-      this.map.remove();
+        this.map.remove();
     }
 
     render() {
         return (
             <div>
-                <div ref={el => this.mapContainer = el} className="mapContainer" />
+            <div ref={el => this.mapContainer = el} className="mapContainer" />
             </div>
         )
     }
 }
-  
+

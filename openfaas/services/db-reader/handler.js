@@ -23,6 +23,7 @@ module.exports = async (event, context) => {
 
                 rows.forEach(l => {
                     features.push({
+                        'id': l.name,
                         'type': 'Feature',
                         'geometry': {
                             'type': 'Point',
