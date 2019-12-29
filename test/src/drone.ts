@@ -1,5 +1,6 @@
 import { connect, ConnectRequest, Emitter } from "emitter-io";
 import LatLon from "geodesy/latlon-spherical.js";
+import { Hangar } from "./hangar";
 import { Delivery, Warehouse } from "./warehouse";
 
 const MAX_PAYLOAD_BATT_DRAIN: number = .005;     // max batt drain (%/s) at max payload
@@ -11,6 +12,22 @@ interface Channel {
     key: string;
 }
 
+interface Location {
+    lat: number;
+    lon: number;
+}
+
+interface EventData {
+    message: string;
+    name: string;
+    batteryPercent?: number;
+    batteryConsumed?: number;
+    hangar?: string;
+    location?: Location;
+    payload?: number;
+    warehouse?: string;
+}
+
 // Assumptions:
 // Drone experiences constant accelleration
 // Power/Payload impact acceleration
@@ -18,11 +35,10 @@ interface Channel {
 export class Drone {
     public id: string;
     public name: string;
-    private hangar: any;
+    private hangar: Hangar;
     private power: number;          // size of drone, impacts speed/accel
 
     private client: Emitter | null;
-    private channels: Channel[];
     private active: boolean;        // deployed in air
     private status: "charging" | "traveling" | "loading" | "unloading";
 
@@ -40,14 +56,13 @@ export class Drone {
     private jobs: Delivery[];       // package deliveries
     private completed: Delivery[];  // complete package deliveries
 
-    constructor(id: string, name: string, hangar: any, power: number) {
+    constructor(id: string, name: string, hangar: Hangar, power: number) {
         this.id = id;
         this.name = name;
         this.hangar = hangar;
         this.power = power;
 
         this.client = null;
-        this.channels = [];
         this.active = false;    // deployed
         this.status = "charging";
 
@@ -58,7 +73,7 @@ export class Drone {
 
         this.altitude = 0;
         this.battery = 1;       // 0 - 1, percent capacity
-        this.temperature = 15;
+        this.temperature = 23;
 
         this.dest = hangar.location;
         this.warehouse = null;
@@ -79,16 +94,16 @@ export class Drone {
         this.accel = 0;
 
         if (!process.env.CHANNEL_KEY_DRONE_POSITION) {
-            console.log("Can't connect to ATC - no CHANNEL_KEY_DRONE_POSITION defined. Drone grounded...")
+            console.log("Can't connect to ATC - no CHANNEL_KEY_DRONE_POSITION defined. Drone grounded...");
             return;
         }
         this.client = connect(broker, () => {
             console.log("%s lifting off", this.name);
-            this.sendEvent('drone_deployed', {
+            this.sendEvent("drone_deployed", {
+                hangar: this.hangar.name,
                 message: "Drone now active",
                 name: this.name,
-                hanger: this.hangar.name,
-                warehouse: this.warehouse && this.warehouse.name
+                warehouse: this.warehouse && this.warehouse.name || "unassigned",
             });
             this.active = true;
             this.run();
@@ -123,19 +138,19 @@ export class Drone {
         this.touchDown(() => {
             console.log("%s delivered package...", this.name);
             const delivery = this.jobs.shift();
-            if (delivery) { 
+            if (delivery) {
                 delivery.batteryConsumed = delivery.batteryConsumed - this.battery;
-                this.completed.push(delivery); 
-                this.sendEvent('package_delivered', {
-                    message: "Package has been delivered",
-                    name: this.name,
-                    warehouse: this.warehouse && this.warehouse.name,
-                    payload: Math.floor(delivery.payload * 100),
+                this.completed.push(delivery);
+                this.sendEvent("package_delivered", {
+                    batteryConsumed: Math.floor(delivery.batteryConsumed * 100),
                     location: {
                         lat: delivery.dest.lat,
                         lon: delivery.dest.lon,
                     },
-                    batteryConsumed: Math.floor(delivery.batteryConsumed * 100),
+                    message: "Package has been delivered",
+                    name: this.name,
+                    payload: Math.floor(delivery.payload * 100),
+                    warehouse: this.warehouse && this.warehouse.name || "unassigned",
                 });
             }
         }, () => {
@@ -150,18 +165,18 @@ export class Drone {
         this.touchDown(() => {
             console.log("%s picked up package...", this.name);
             this.jobs = this.warehouse && this.warehouse.pickup() || [];
-            this.jobs.forEach(element => {
+            this.jobs.forEach((element) => {
                 // save the starting battery level, we'll calculate consumption once we drop
                 element.batteryConsumed = this.battery;
-                this.sendEvent('package_loaded', {
-                    message: "Package has been loaded",
-                    name: this.name,
-                    warehouse: this.warehouse && this.warehouse.name,
-                    payload: Math.floor(element.payload * 100),
+                this.sendEvent("package_loaded", {
                     location: {
                         lat: element.dest.lat,
-                        lon: element.dest.lon
-                    }
+                        lon: element.dest.lon,
+                    },
+                    message: "Package has been loaded",
+                    name: this.name,
+                    payload: Math.floor(element.payload * 100),
+                    warehouse: this.warehouse && this.warehouse.name || "unassigned",
                 });
             });
         }, () => {
@@ -173,14 +188,14 @@ export class Drone {
         });
     }
 
-    private async sendEvent(eventType: string, eventData: object) {
+    private async sendEvent(eventType: string, eventData: EventData) {
         // tslint:disable-next-line: no-unused-expression
         this.client && this.client.publish({
             channel: "drone-event",
             key: process.env.CHANNEL_KEY_DRONE_EVENT || "",
             message: JSON.stringify({
-                eventType: eventType,
                 data: eventData,
+                type: eventType,
             }),
         });
     }
@@ -230,20 +245,20 @@ export class Drone {
                 name: this.name,
                 payloadPercent: Math.floor(payload * 100),
                 speed: this.speed,
-                tempCelsius: this.temperature,
+                tempCelsius: this.temperature + (this.altitude / 100) + (2 * Math.random()),
             }),
         });
 
         // calculate trajectory corrections
-        if (this.battery < LOW_BATT_LEVEL && 
-                0 === this.jobs.length && 
-                this.status === 'traveling' && 
+        if (this.battery < LOW_BATT_LEVEL &&
+                0 === this.jobs.length &&
+                this.status === "traveling" &&
                 this.dest !== this.hangar.location) {
             // divert to hangar if battery gets low while returning to warehouse
-            this.sendEvent('low_battery', {
+            this.sendEvent("low_battery", {
+                batteryPercent: Math.floor(this.battery * 100),
                 message: "Battery is low, returning to charge",
                 name: this.name,
-                batteryPercent: Math.floor(this.battery * 100),
             });
             console.log("%s has low battery, diverting to hangar...", this.name);
             this.goTo(this.hangar.location);
@@ -267,16 +282,81 @@ export class Drone {
         }
     }
 
+    private processErrors() {
+        // calculate random error events
+        if (Math.random() > .999) {
+            // .1% chance of high wind
+            this.sendEvent("system_error", {
+                location: {
+                    lat: this.location.lat,
+                    lon: this.location.lon,
+                },
+                message: "High Wind Warning",
+                name: this.name,
+            });
+        }
+
+        if (Math.random() > .9999) {
+            // .01% chance of gps sensor malfunction
+            this.sendEvent("system_error", {
+                location: {
+                    lat: this.location.lat,
+                    lon: this.location.lon,
+                },
+                message: "GPS Sensor Malfunction",
+                name: this.name,
+            });
+        }
+
+        if (Math.random() > .9999) {
+            // .01% chance of gyro sensor malfunction
+            this.sendEvent("system_error", {
+                location: {
+                    lat: this.location.lat,
+                    lon: this.location.lon,
+                },
+                message: "Gyro Sensor Malfunction",
+                name: this.name,
+            });
+        }
+
+        if (Math.random() > .99995) {
+            // .005% chance of battery overheating
+            this.sendEvent("system_error", {
+                location: {
+                    lat: this.location.lat,
+                    lon: this.location.lon,
+                },
+                message: "High Battery Temperature",
+                name: this.name,
+            });
+        }
+
+        if (Math.random() > .99995) {
+            // .005% chance of motor running inefficient
+            this.sendEvent("system_error", {
+                location: {
+                    lat: this.location.lat,
+                    lon: this.location.lon,
+                },
+                message: "Motor Overcurrent",
+                name: this.name,
+            });
+        }
+    }
+
     private async run() {
         while (this.active) {
             this.processState();
+            this.processErrors();
             // console.log(this);
             await new Promise((resolve) => setTimeout(resolve, 1000));
         }
-        await this.sendEvent('drone_grounded', {
+        await this.sendEvent("drone_grounded", {
+            batteryPercent: Math.floor(this.battery * 100),
+            hangar: this.hangar.name,
             message: "Drone returned to hangar",
             name: this.name,
-            hanger: this.hangar.name
         });
         console.log("%s returned to hangar...", this.name);
         // tslint:disable-next-line: no-unused-expression
