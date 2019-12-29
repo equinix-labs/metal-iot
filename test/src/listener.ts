@@ -59,7 +59,14 @@ export class TrafficController {
 
                 if (obj.type === "drone_grounded") {
                     // @ts-ignore: Unreachable code error
-                    this.fin[obj.data.name] = obj.data;
+                    this.fin[obj.data.name] = {
+                        batteryPercent: obj.data.batteryPercent,
+                        // @ts-ignore: Unreachable code error
+                        deliveriesCompleted: this.deliveries[obj.data.name].length,
+                    };
+                    console.log("\n\Drone Returned to Hangar - deliveries completed");
+                    // @ts-ignore: Unreachable code error
+                    console.log(this.deliveries[obj.data.name] || "None");
                 }
             });
         });
@@ -72,9 +79,6 @@ export class TrafficController {
 
             console.log("\n\nEvent Counts");
             console.log(this.events);
-
-            console.log("\n\nDeliveries");
-            console.log(this.deliveries);
 
             console.log("\n\nFinishers");
             console.log(this.fin);

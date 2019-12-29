@@ -43,6 +43,12 @@ export EMITTER_PORT=8124
     npm start
     ```
 
+4. A listener module is included which will connect to emitter and monitor events created by the simulator.  Usage is optional once you've started the simulator.
+
+    ```sh
+    node dist/listener.js
+    ```
+
 
 ## Status Updates
 
