@@ -43,6 +43,12 @@ export EMITTER_PORT=8124
     npm start
     ```
 
+4. A listener module is included which will connect to emitter and monitor events created by the simulator.  Usage is optional once you've started the simulator.
+
+    ```sh
+    node dist/listener.js
+    ```
+
 
 ## Status Updates
 
@@ -83,11 +89,14 @@ this.client.publish({
     message: JSON.stringify({
         type: "low_battery",
         data: {
-            "message": "Battery is low, returning to charge"
+            "name" "dronus maximus",
+            "message": "Battery is low, returning to charge",
             "batteryPercent": 19
         }
     }),
 });
+
+The `data` field will always contain `message` and `name` fields.  All other fields are optional depending on the event type.
 ```
 
 ### Event Type: drone_deployed
@@ -96,9 +105,9 @@ Sent when a drone is deployed from hangar to a warehouse.
 
 ```ts
 data: {
-    message: "Drone now active"
-    name: "dronus maximus"
-    hangar: "Mothership"
+    message: "Drone now active",
+    name: "dronus maximus",
+    hangar: "Mothership",
     warehouse: "Newtown Central
 }
 ```
@@ -112,6 +121,7 @@ data: {
     message: "Drone returned to hangar",
     name: "dronus maximus",
     hangar: "Mothership",
+    batteryPercent: 5
 }
 ```
 
@@ -123,7 +133,7 @@ Sent when battery is low and drone is returning to hangar to recharge.
 data: {
     name: "dronus maximus",
     message: "Battery is low, returning to charge",
-    batteryPercent: 19,
+    batteryPercent: 19
 }
 ```
 
@@ -131,16 +141,16 @@ data: {
 
 Sent when a delivery is picked up from warehouse.
 
-```
+```ts
 data: {
     name: "dronus maximus"
     message: "Package has been loaded",
     warehouse: "Newtown Central",
     location: {
         lat: -37.95105,
-        lon: 144.42491,
+        lon: 144.42491
     },
-    payload: 35,    // percent of capacity
+    payload: 35     // percent of capacity
 }
 ```
 
@@ -159,7 +169,7 @@ data: {
     },
     distance: 1234,         // meters
     payload: 35,            // percent of capacity
-    batteryConsumed: 8,     // percent of battery consumed during delivery
+    batteryConsumed: 8      // percent of battery consumed during delivery
 }
 ```
 
@@ -173,7 +183,7 @@ data: {
     message: "gps sensor error",
     location: {
         lat: -37.95105,
-        lon: 144.42491,
+        lon: 144.42491
     },
 }
 ```
