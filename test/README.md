@@ -7,13 +7,14 @@ This project simulates clusters of drones delivering packages from warehouses to
 
 ## Getting Started
 
-1. Configure the emitter host variables along with emitter channel keys for `drone-position` and `drone-event`(via OS or .env file).  `EMITTER_HOST` defaults to `127.0.0.1` if not set.  `EMITTER_PORT` defaults to `8080` if not set.
+1. Configure the emitter host variables along with emitter channel keys for `control-event`, `drone-position` and `drone-event`(via OS or .env file).  `EMITTER_HOST` defaults to `127.0.0.1` if not set.  `EMITTER_PORT` defaults to `8080` if not set.
 
 You can work with a local Emitter instance, or you can connect to the version deployed in your cluster using port-forwarding, or the NodePort 30080 and the public IP of one of the nodes.
 
 ```sh
 export CHANNEL_KEY_DRONE_POSITION="pZtoyNQ_b3WPRc63Br5QJv8CCcP2gfKZ"
 export CHANNEL_KEY_DRONE_EVENT="qlnEY07lFKttkvyZbyzshmiDFPQOo232"
+export CHANNEL_KEY_CONTROL_EVENT="3Lutukd1Nj1-nPdlKNlIT5tr791G_ofn"
 ```
 
 Port-forwarding:
