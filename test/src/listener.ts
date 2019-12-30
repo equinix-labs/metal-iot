@@ -21,20 +21,23 @@ export class TrafficController {
         this.fin = {};
         this.client = connect(broker, () => {
             console.log("connected to data feed");
-            /*
-            this.client.subscribe({
+
+            /*this.client.subscribe({
                 channel: "drone-position",
-                key: "ozCBeA3d-x0UcALTmUAEgEYiesJu6OoL",
-            });
-            */
+                key: process.env.CHANNEL_KEY_DRONE_POSITION || "",
+            });*/
 
             this.client.subscribe({
                 channel: "drone-event",
-                key: "gVuBeA3d-x0UcALTmUAEgAGTOfRu6OoL",
+                key: process.env.CHANNEL_KEY_DRONE_EVENT || "",
             });
 
             this.client.on("message", (msg: EmitterMessage) => {
                 console.log(msg.asString());
+                console.log(msg.channel);
+                if (msg.channel === "drone-position/") {
+                    return;
+                }
                 const obj = msg.asObject();
                 if (obj.type === "system_error") {
                     // @ts-ignore: Unreachable code error
@@ -62,7 +65,7 @@ export class TrafficController {
                     this.fin[obj.data.name] = {
                         batteryPercent: obj.data.batteryPercent,
                         // @ts-ignore: Unreachable code error
-                        deliveriesCompleted: this.deliveries[obj.data.name].length,
+                        deliveriesCompleted: this.deliveries[obj.data.name] && this.deliveries[obj.data.name].length,
                     };
                     console.log("\n\Drone Returned to Hangar - deliveries completed");
                     // @ts-ignore: Unreachable code error

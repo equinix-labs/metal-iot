@@ -50,7 +50,7 @@ export EMITTER_PORT=8124
     ```
 
 
-## Status Updates
+## Drone Position Updates
 
 Drones report their status via mqtt using emitter.io on the `drone-position` channel. 
 
@@ -73,19 +73,23 @@ this.client.publish({
         name: "Alpha Cortex",
         payloadPercent: 34,
         speed: 20.3,            // meters/sec
+        status: "traveling"
         tempCelsius: 4.2,
     }),
 });
+
+Valid values for `status` are "pausing", "aborting", "charging", "traveling", "loading", "unloading"
+
 ```
 
-## Events
+## Drone Events
 
 Events are reported via the `drone-event` channel.
 
 ```ts
 this.client.publish({
     channel: "drone-event",
-    key: process.env.CHANNEL_KEY_EVENT,
+    key: process.env.CHANNEL_KEY_DRONE_EVENT,
     message: JSON.stringify({
         type: "low_battery",
         data: {
@@ -187,3 +191,74 @@ data: {
     },
 }
 ```
+
+### Event Type: control_event_rx
+
+Sent whenever a control event is received by a drone
+
+```ts
+data: {
+    name: "dronus maximus",
+    message: "control event received",
+    event: "paused"
+}
+```
+
+## Controlling Drones
+
+All drones listen for control events on the `control-event` channel. Control events allow for drones to be remotely managed for traffic control purposes.  Each message send on the `contol-event` channel has a `filter`, `type`, and `data` field.
+
+
+```ts
+this.client.publish({
+    channel: "control-event",
+    key: process.env.CHANNEL_KEY_CONTROL_EVENT,
+    message: JSON.stringify({
+        filter: {
+            name: ["dronus maximus", "dronus minimus", "felix the drone"],
+            warehouse: [],
+            hangar: []
+        }
+        type: "pause",
+        data: {}
+    }),
+});
+
+`filter` is an object including whitelist criteria for which drones the event applies to. List of names, warehouses, and hangars be used. A drone matching ANY of the lists will be impacted by the event.
+
+`type` indicates the event type
+
+`data` is an object containing event specific data.  Details of each event type
+
+```
+
+### Event Type: pause
+Sent when a drone should immediately pause.  Drones will hold position until they have a low battery or receive a `resume` event
+
+```ts
+data: {}  // None
+```
+
+### Event Type: resume
+Sent when a drone should resume operation.  
+
+```ts
+data: {}  // None
+```
+
+### Event Type: abort
+Sent when a drone should abort operations and return to the hangar.  
+
+```ts
+data: {}  // None
+```
+
+### Event Type: set_altitude
+Sent to specify a target altitude that the drone should fly at.  Typically used to avoid collisions with other drones.
+
+```ts
+data: {
+    altitude: 420  // meters
+}
+```
+
