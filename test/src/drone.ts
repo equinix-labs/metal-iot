@@ -1,4 +1,4 @@
-import { connect, ConnectRequest, Emitter } from "emitter-io";
+import { connect, ConnectRequest, Emitter, EmitterMessage } from "emitter-io";
 import LatLon from "geodesy/latlon-spherical.js";
 import { Hangar } from "./hangar";
 import { Delivery, Warehouse } from "./warehouse";
@@ -22,10 +22,23 @@ interface EventData {
     name: string;
     batteryPercent?: number;
     batteryConsumed?: number;
+    event?: string;
     hangar?: string;
     location?: Location;
     payload?: number;
     warehouse?: string;
+}
+
+interface ControlEvent {
+    type: "pause" | "resume" | "abort" | "set_altitude";
+    filter: {
+        name?: string[];
+        warehouse?: string[];
+        hangar?: string[];
+    };
+    data: {
+        altitude?: number;
+    };
 }
 
 // Assumptions:
@@ -56,6 +69,10 @@ export class Drone {
     private jobs: Delivery[];       // package deliveries
     private completed: Delivery[];  // complete package deliveries
 
+    private ctlPause: boolean;      // flag indicating the drone is paused
+    private ctlAbort: boolean;      // flag indicating the drone operation is aborted
+    private ctlAltitude: number;    // the desired altitude for operation
+
     constructor(id: string, name: string, hangar: Hangar, power: number) {
         this.id = id;
         this.name = name;
@@ -80,25 +97,73 @@ export class Drone {
 
         this.jobs = [];
         this.completed = [];
+
+        this.ctlPause = false;
+        this.ctlAbort = false;
+        this.ctlAltitude = 300;
     }
 
     // take off an begin delivering packages from warehouse
     public async deploy(warehouse: Warehouse, broker: ConnectRequest) {
         // takeoff (assume it takes 5 secs)
         this.goTo(warehouse.location);
-        this.altitude = 300;
+        this.altitude = this.ctlAltitude;
         this.battery = 1;
         this.location = this.hangar.location;
         this.warehouse = warehouse;
         this.speed = 0;
         this.accel = 0;
 
-        if (!process.env.CHANNEL_KEY_DRONE_POSITION) {
-            console.log("Can't connect to ATC - no CHANNEL_KEY_DRONE_POSITION defined. Drone grounded...");
+        if (!process.env.CHANNEL_KEY_DRONE_POSITION
+            || !process.env.CHANNEL_KEY_DRONE_EVENT
+            || !process.env.CHANNEL_KEY_CONTROL_EVENT) {
+            console.log("Can't connect to ATC - missing channel key(s). Drone grounded...");
             return;
         }
         this.client = connect(broker, () => {
             console.log("%s lifting off", this.name);
+
+            // tslint:disable-next-line: no-unused-expression
+            this.client && this.client.subscribe({
+                channel: "control-event",
+                key: process.env.CHANNEL_KEY_CONTROL_EVENT || "",
+            });
+
+            // tslint:disable-next-line: no-unused-expression
+            this.client && this.client.on("message", (msg: EmitterMessage) => {
+                const message: ControlEvent = msg.asObject();
+                console.log(message);
+                if ((message.filter.name && message.filter.name.includes(this.name))
+                    || (message.filter.warehouse && message.filter.warehouse.includes(
+                            this.warehouse && this.warehouse.name || ""))
+                    || (message.filter.hangar && message.filter.hangar.includes(this.hangar.name))
+                ) {
+                    console.log("%s received control event %s", this.name, message.type);
+                    this.sendEvent("control_event_rx", {
+                        event: message.type,
+                        message: "control event received",
+                        name: this.name,
+                    });
+                } else {
+                    return;
+                }
+
+                if (message.type === "pause") {
+                    this.ctlPause = true;
+                }
+                if (message.type === "resume") {
+                    this.ctlPause = false;
+                }
+                if (message.type === "abort") {
+                    this.ctlAbort = true;
+                }
+                if (message.type === "set_altitude") {
+                    this.ctlAltitude = message.data.altitude || this.ctlAltitude;
+                    console.log("%s adjusting altitude to %d", this.name, this.ctlAltitude);
+                }
+
+            });
+
             this.sendEvent("drone_deployed", {
                 hangar: this.hangar.name,
                 message: "Drone now active",
@@ -125,7 +190,8 @@ export class Drone {
                 const ascendTimer = setInterval(() => {
                     // console.log("ascending....");
                     this.altitude = this.altitude * (3 / 2);
-                    if (this.altitude >= 300) {
+                    if (this.altitude >= this.ctlAltitude) {
+                        this.altitude = this.ctlAltitude;
                         clearInterval(ascendTimer);
                         ascendedCallback();
                     }
@@ -224,8 +290,10 @@ export class Drone {
         this.location = this.location.destinationPoint(this.calcDistanceTraveled(1), this.bearing);
         this.bearing = this.location.initialBearingTo(this.dest) || 0;
         this.speed = Math.min(this.power * 10, Math.max(this.speed + this.accel, 0));
-        console.log("%s %s at location: %s, bearing: %d, speed %d, accel %d, batt %d",
-            this.name, this.status, this.location.toString(), this.bearing, this.speed, this.accel, this.battery);
+        const calcStatus = this.ctlPause && "pausing" || this.ctlAbort && "aborting" || this.status;
+        console.log("%s %s at location: %s, bearing: %d, alt %s, speed %d, accel %d, batt %d",
+            this.name, calcStatus, this.location.toString(), this.bearing, this.altitude,
+            this.speed, this.accel, this.battery);
         // tslint:disable-next-line: no-unused-expression
         this.client && this.client.publish({
             channel: "drone-position",
@@ -245,11 +313,16 @@ export class Drone {
                 name: this.name,
                 payloadPercent: Math.floor(payload * 100),
                 speed: this.speed,
+                status: calcStatus,
                 tempCelsius: this.temperature + (this.altitude / 100) + (2 * Math.random()),
             }),
         });
 
         // calculate trajectory corrections
+        if (this.ctlAbort && this.status === "traveling") {
+            // force abort as soon as possible
+            this.goTo(this.hangar.location);
+        }
         if (this.battery < LOW_BATT_LEVEL &&
                 0 === this.jobs.length &&
                 this.status === "traveling" &&
@@ -267,7 +340,24 @@ export class Drone {
         const stopDist = this.calcStopDistance();
         // console.log("%d meters to dest, %d needed to stop", distToDest, stopDist);
 
-        if (distToDest < this.power) {
+        // adjust altitude when traveling
+        if (this.status === "traveling") {
+            this.altitude = (this.ctlAltitude > this.altitude)
+                ? this.altitude + this.power : this.altitude - this.power;
+            if (Math.abs(this.ctlAltitude - this.altitude) < this.power) {
+                // add a little randomness
+                this.altitude = this.ctlAltitude + (10 * Math.random()) - 5;
+            }
+        }
+
+        if (this.ctlPause) {
+            console.log ("pausing");
+            this.accel = -this.power;
+            if (Math.abs(this.speed) < this.power) {
+                this.speed = 0;
+                this.accel = 0;
+            }
+        } else if (distToDest < this.power) {
             // console.log("stopping");
             this.location = this.dest;
             this.speed = 0;

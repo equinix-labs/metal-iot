@@ -9,8 +9,10 @@ const distNW = new Warehouse("NW Vegas", new LatLon(36.246499, -115.290328), 300
 
 // deploy drones evenly
 config();
-if (!process.env.CHANNEL_KEY_DRONE_POSITION || ! process.env.CHANNEL_KEY_DRONE_EVENT) {
-    console.error("You must set CHANNEL_KEY_DRONE_POSITION and CHANNEL_KEY_DRONE_EVENT env variables");
+if (!process.env.CHANNEL_KEY_DRONE_POSITION
+    || ! process.env.CHANNEL_KEY_DRONE_EVENT
+    || ! process.env.CHANNEL_KEY_CONTROL_EVENT) {
+    console.error("You must set CHANNEL_KEY_DRONE_POSITION, CHANNEL_KEY_DRONE_EVENT and CHANNEL_KEY_CONTROL_EVENT env variables");
 }
 
 console.log("deploying drones...");
