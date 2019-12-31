@@ -30,7 +30,7 @@ interface EventData {
 }
 
 interface ControlEvent {
-    type: "pause" | "resume" | "abort" | "set_altitude";
+    type: "pause" | "resume" | "cancel" | "set_altitude";
     filter: {
         name?: string[];
         warehouse?: string[];
@@ -70,7 +70,7 @@ export class Drone {
     private completed: Delivery[];  // complete package deliveries
 
     private ctlPause: boolean;      // flag indicating the drone is paused
-    private ctlAbort: boolean;      // flag indicating the drone operation is aborted
+    private ctlCancel: boolean;     // flag indicating the drone operation is cancelled
     private ctlAltitude: number;    // the desired altitude for operation
 
     constructor(id: string, name: string, hangar: Hangar, power: number) {
@@ -99,7 +99,7 @@ export class Drone {
         this.completed = [];
 
         this.ctlPause = false;
-        this.ctlAbort = false;
+        this.ctlCancel = false;
         this.ctlAltitude = 300;
     }
 
@@ -109,7 +109,6 @@ export class Drone {
         this.goTo(warehouse.location);
         this.altitude = this.ctlAltitude;
         this.battery = 1;
-        this.location = this.hangar.location;
         this.warehouse = warehouse;
         this.speed = 0;
         this.accel = 0;
@@ -132,12 +131,12 @@ export class Drone {
             // tslint:disable-next-line: no-unused-expression
             this.client && this.client.on("message", (msg: EmitterMessage) => {
                 const message: ControlEvent = msg.asObject();
-                console.log(message);
                 if ((message.filter.name && message.filter.name.includes(this.name))
                     || (message.filter.warehouse && message.filter.warehouse.includes(
                             this.warehouse && this.warehouse.name || ""))
                     || (message.filter.hangar && message.filter.hangar.includes(this.hangar.name))
                 ) {
+                    console.log(message);
                     console.log("%s received control event %s", this.name, message.type);
                     this.sendEvent("control_event_rx", {
                         event: message.type,
@@ -154,8 +153,8 @@ export class Drone {
                 if (message.type === "resume") {
                     this.ctlPause = false;
                 }
-                if (message.type === "abort") {
-                    this.ctlAbort = true;
+                if (message.type === "cancel") {
+                    this.ctlCancel = true;
                 }
                 if (message.type === "set_altitude") {
                     this.ctlAltitude = message.data.altitude || this.ctlAltitude;
@@ -290,7 +289,7 @@ export class Drone {
         this.location = this.location.destinationPoint(this.calcDistanceTraveled(1), this.bearing);
         this.bearing = this.location.initialBearingTo(this.dest) || 0;
         this.speed = Math.min(this.power * 10, Math.max(this.speed + this.accel, 0));
-        const calcStatus = this.ctlPause && "pausing" || this.ctlAbort && "aborting" || this.status;
+        const calcStatus = this.ctlPause && "pausing" || this.ctlCancel && "cancelling" || this.status;
         console.log("%s %s at location: %s, bearing: %d, alt %s, speed %d, accel %d, batt %d",
             this.name, calcStatus, this.location.toString(), this.bearing, this.altitude,
             this.speed, this.accel, this.battery);
@@ -319,8 +318,8 @@ export class Drone {
         });
 
         // calculate trajectory corrections
-        if (this.ctlAbort && this.status === "traveling") {
-            // force abort as soon as possible
+        if (this.ctlCancel && this.status === "traveling") {
+            // force cancel as soon as possible
             this.goTo(this.hangar.location);
         }
         if (this.battery < LOW_BATT_LEVEL &&
@@ -373,15 +372,39 @@ export class Drone {
     }
 
     private processErrors() {
-        // calculate random error events
+        // calculate random error and warning events
         if (Math.random() > .999) {
             // .1% chance of high wind
-            this.sendEvent("system_error", {
+            this.sendEvent("system_warning", {
                 location: {
                     lat: this.location.lat,
                     lon: this.location.lon,
                 },
                 message: "High Wind Warning",
+                name: this.name,
+            });
+        }
+
+        if (Math.random() > .999) {
+            // .1% chance of battery overheating
+            this.sendEvent("system_warning", {
+                location: {
+                    lat: this.location.lat,
+                    lon: this.location.lon,
+                },
+                message: "High Battery Temperature",
+                name: this.name,
+            });
+        }
+
+        if (Math.random() > .99995) {
+            // .005% chance of motor running inefficient
+            this.sendEvent("system_error", {
+                location: {
+                    lat: this.location.lat,
+                    lon: this.location.lon,
+                },
+                message: "Motor Overcurrent",
                 name: this.name,
             });
         }
@@ -406,30 +429,6 @@ export class Drone {
                     lon: this.location.lon,
                 },
                 message: "Gyro Sensor Malfunction",
-                name: this.name,
-            });
-        }
-
-        if (Math.random() > .99995) {
-            // .005% chance of battery overheating
-            this.sendEvent("system_error", {
-                location: {
-                    lat: this.location.lat,
-                    lon: this.location.lon,
-                },
-                message: "High Battery Temperature",
-                name: this.name,
-            });
-        }
-
-        if (Math.random() > .99995) {
-            // .005% chance of motor running inefficient
-            this.sendEvent("system_error", {
-                location: {
-                    lat: this.location.lat,
-                    lon: this.location.lon,
-                },
-                message: "Motor Overcurrent",
                 name: this.name,
             });
         }

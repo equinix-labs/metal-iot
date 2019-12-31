@@ -6,10 +6,11 @@ if (!process.env.CHANNEL_KEY_DRONE_POSITION || ! process.env.CHANNEL_KEY_DRONE_E
     console.error("You must set CHANNEL_KEY_DRONE_POSITION and CHANNEL_KEY_DRONE_EVENT env variables");
 }
 
-export class TrafficController {
+export class DroneMonitor {
 
     private client: Emitter;
     private errors: object;
+    private warnings: object;
     private events: object;
     private deliveries: object;
     private fin: object;
@@ -17,6 +18,7 @@ export class TrafficController {
     constructor(broker: ConnectRequest) {
         this.errors = {};
         this.events = {};
+        this.warnings = {};
         this.deliveries = {};
         this.fin = {};
         this.client = connect(broker, () => {
@@ -34,7 +36,6 @@ export class TrafficController {
 
             this.client.on("message", (msg: EmitterMessage) => {
                 console.log(msg.asString());
-                console.log(msg.channel);
                 if (msg.channel === "drone-position/") {
                     return;
                 }
@@ -44,6 +45,11 @@ export class TrafficController {
                     this.errors[obj.data.message] =
                         // @ts-ignore: Unreachable code error
                         this.errors[obj.data.message] && this.errors[obj.data.message] + 1 || 1;
+                } else if (obj.type === "system_warning") {
+                    // @ts-ignore: Unreachable code error
+                    this.warnings[obj.data.message] =
+                        // @ts-ignore: Unreachable code error
+                        this.warnings[obj.data.message] && this.warnings[obj.data.message] + 1 || 1;
                 } else {
                     // @ts-ignore: Unreachable code error
                     this.events[obj.data.name] = this.events[obj.data.name] || {};
@@ -80,6 +86,9 @@ export class TrafficController {
             console.log("System Error Counts");
             console.log(this.errors);
 
+            console.log("System Warning Counts");
+            console.log(this.warnings);
+
             console.log("\n\nEvent Counts");
             console.log(this.events);
 
@@ -90,7 +99,7 @@ export class TrafficController {
     }
 }
 
-const listener = new TrafficController({
+const listener = new DroneMonitor({
     host: process.env.EMITTER_HOST || "127.0.0.1",
     port: parseInt(process.env.EMITTER_PORT || "8080", 10),
 });

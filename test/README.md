@@ -178,6 +178,23 @@ data: {
 }
 ```
 
+### Event Type: system_warning
+
+Sent when a dongerous conditions detected in the drone.
+
+```ts
+data: {
+    name: "dronus maximus",
+    message: "high wind",
+    location: {
+        lat: -37.95105,
+        lon: 144.42491
+    },
+}
+```
+
+`High Wind Warning` and `High Battery Temperature` are valid warnings.
+
 ### Event Type: system_error
 
 Sent when a malfunction occurs in the drone.
@@ -192,6 +209,8 @@ data: {
     },
 }
 ```
+
+`Motor Overcurrent`, `GPS Sensor Malfunction`, and `Gyro Sensor Malfunction` are valid errors.
 
 ### Event Type: control_event_rx
 
@@ -247,8 +266,8 @@ Sent when a drone should resume operation.
 data: {}  // None
 ```
 
-### Event Type: abort
-Sent when a drone should abort operations and return to the hangar.  
+### Event Type: cancel
+Sent when a drone should terminate operations and return to the hangar.  
 
 ```ts
 data: {}  // None
