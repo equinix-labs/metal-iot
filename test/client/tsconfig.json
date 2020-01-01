@@ -6,7 +6,11 @@
     "moduleResolution": "node",
     "strict": true,
     "sourceMap": true,
-    "outDir": "dist"
+    "outDir": "build"
   },
-  "lib": ["es2017"]
+  "lib": ["es2017"],
+  "exclude":[
+    "node_modules",
+    "build"
+  ]
 }

@@ -2,9 +2,10 @@
   "name": "node12",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "build/app.js",
   "scripts": {
-    "start": "tsc && node -r esm dist/app.js",
+    "start": "tsc && node -r esm build/app.js",
+    "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -16,10 +17,10 @@
     "dotenv": "^8.2.0",
     "emitter-io": "^1.39.0",
     "esm": "^3.2.25",
-    "geodesy": "^2.2.0"
+    "geodesy": "^2.2.0",
+    "typescript": "^3.7.3"
   },
   "devDependencies": {
-    "tslint": "^5.20.1",
-    "typescript": "^3.7.3"
+    "tslint": "^5.20.1"
   }
 }

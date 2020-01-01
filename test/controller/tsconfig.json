@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "target": "es2017",
+    "moduleResolution": "node",
+    "strict": true,
+    "sourceMap": true,
+    "outDir": "build"
+  },
+  "lib": ["es2017"],
+  "exclude":[
+    "node_modules",
+    "build"
+  ]
+}
