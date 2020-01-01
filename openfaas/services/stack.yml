@@ -4,6 +4,16 @@ provider:
   gateway: http://127.0.0.1:8080
 
 functions:
+  mqtt-publisher:
+    lang: node12
+    handler: ./mqtt-publisher
+    image: ${DOCKER_USER:-alexellis2}/mqtt-publisher:0.0.0
+    labels:
+      com.openfaas.scale.min: 0
+      com.openfaas.scale.max: 10
+    secrets:
+      - emitter
+
   db-inserter:
     lang: node12
     handler: ./db-inserter
