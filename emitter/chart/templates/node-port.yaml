@@ -6,7 +6,6 @@ spec:
   type: NodePort
   selector:
     app: broker
-    namespace: openfaas
   ports:
     - port: 8080
       nodePort: 30080
@@ -14,22 +13,5 @@ spec:
       name: http
     - port: 8443
       nodePort: 30443
-      targetPort: 8443
-      name: https
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: emitter
-spec:
-  type: ClusterIP
-  selector:
-    app: broker
-    namespace: openfaas
-  ports:
-    - port: 8080
-      targetPort: 8080
-      name: http
-    - port: 8443
       targetPort: 8443
       name: https

@@ -1,0 +1,20 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    kubernetes.io/ingress.class: traefik
+  name: emitter
+spec:
+  rules:
+  - host: emitter.{{ .Values.domain }}
+    http:
+      paths:
+      - backend:
+          serviceName: emitter
+          servicePort: 8080
+        path: /
+  tls:
+  - hosts:
+    - emitter.{{ .Values.domain }}
+    secretName: emitter-tls

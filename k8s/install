@@ -1,0 +1,268 @@
+#!/bin/bash
+
+while getopts ':e:r:d:b:D:' opt; do
+    case ${opt} in
+        e)
+            email=$OPTARG
+            ;;
+        r)
+            repo=$OPTARG
+            ;;
+        d)
+            domain=$OPTARG
+            ;;
+        b)
+            branch=$OPTARG
+            ;;
+        D)
+            docker=$OPTARG
+            ;;
+        \?)
+            echo "Invalid option: $OPTARG" 1>&2
+            exit 1
+            ;;
+        :)
+            echo "Invalid option: $OPTARG requires and argument" 1>&2
+            exit 1
+            ;;
+    esac
+done
+
+dir=$(mktemp -d -t packet-iot-XXXXXXXXXX)
+
+trap stop_forwards TERM EXIT
+
+forwards=()
+
+function stop_forwards {
+    echo "${forwards[@]}"
+    for pid in "${forwards[@]}"; do
+        kill $pid
+    done
+}
+
+# Install latest Helm 2.
+if ! which helm > /dev/null; then
+    (cd $dir && {
+        curl -LO https://get.helm.sh/helm-v2.16.1-linux-amd64.tar.gz
+        tar zxf helm-v*-linux-amd64.tar.gz
+        mv linux-amd64/helm /usr/local/bin
+        chmod +x /usr/local/bin/helm
+    })
+fi
+
+# Create a service account for Tiller.
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: tiller
+  namespace: kube-system
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: tiller-clusterrolebinding
+subjects:
+  - kind: ServiceAccount
+    name: tiller
+    namespace: kube-system
+roleRef:
+  kind: ClusterRole
+  name: cluster-admin
+  apiGroup: ''
+EOF
+
+if [[ ! -e /usr/bin/git ]]; then
+    apt-get update
+    apt-get install -y git
+fi
+
+# Copy our conifguration to where Helm expects to find it.
+cp /etc/rancher/k3s/k3s.yaml ~/.kube/config
+
+if ! helm version > /dev/null; then
+    # Initialize Helm.
+    helm init --upgrade --service-account tiller
+fi
+
+while ! helm version > /dev/null; do
+    sleep 1
+done
+
+helm version
+
+# Create the OpenFaaS namespace.
+#kubectl create namespace openfaas
+
+# Install PostgreSQL using Helm.
+if [[ -z $(helm ls --all postgresql --output json) ]]; then
+    helm install --name postgresql stable/postgresql
+fi
+
+# Install OpenFaaS CLI.
+if ! which faas-cli > /dev/null; then
+    curl -sLS https://cli.openfaas.com | sh
+fi
+
+
+# Install the `k3sup` utility.
+if ! which k3sup > /dev/null; then
+    curl -SLfs https://get.k3sup.dev | sudo sh
+fi
+
+# Install OpenFaaS.
+if [[ -z "$(kubectl get -n openfaas deploy/gateway -o json 2>/dev/null)" ]]; then
+    while [[ -z "$(kubectl get -n openfaas deploy/gateway -o json 2>/dev/null)" ]]; do
+        k3sup app install openfaas --gateways 2 --queue-workers 4
+    done
+
+    # Watch the rollout until it is done.
+    kubectl rollout status -w -n openfaas deploy/gateway
+
+    # Forward the OpenFaaS port.
+    kubectl port-forward -n openfaas svc/gateway 8084:8080 &
+    forwards+=("$!")
+
+    export OPENFAAS_URL=http://127.0.0.1:8084
+
+    echo "forwards" ${forwards[@]}
+
+    while ! curl -df "$OPENFAAS_URL" > /dev/null; do
+        echo "Waiting for OpenFaaS port forwarding."
+        sleep 1
+    done
+
+    # Authenticate with OpenFaaS.
+    PASSWORD=$(kubectl get secret -n openfaas basic-auth -o jsonpath="{.data.basic-auth-password}" | base64 --decode; echo)
+    echo -n $PASSWORD | faas-cli login --username admin --password-stdin
+
+    # Verify that OpenFaaS is working with a simple function.
+    faas-cli store list
+    faas-cli store deploy nodeinfo
+    faas-cli describe nodeinfo
+    echo verbose | faas-cli invoke nodeinfo
+fi
+
+if [[ -z "$(kubectl -n openfaas-fn get secret db -o json)" ]]; then
+    postgres_password=$(kubectl get secret --namespace default postgresql -o jsonpath="{.data.postgresql-password}" | base64 --decode)
+    kubectl create secret generic -n openfaas-fn db \
+        --from-literal db-username="postgres" \
+        --from-literal db-password="$postgres_password" \
+        --from-literal db-host="postgresql.default.svc.cluster.local"
+fi
+
+if [[ ! -e ~/iot ]]; then
+    git clone "$repo" ~/iot
+    git -C ~/iot checkout "$branch"
+fi
+
+git -C ~/iot status
+
+if [[ -z "$(kubectl -n openfaas get secrets -o json | jq '.items[] | select(.metadata.name == "emitter")')" ]]; then
+    emitter_keys=()
+
+    while read -r line; do
+        emitter_keys+=("$line")
+    done < <(kubectl run --rm -i -t emitter --image=emitter/server:latest --restart=Never | awk '/generated/ { print $NF }')
+
+    emitter_license="${emitter_keys[0]}"
+    emitter_secret_key="${emitter_keys[1]}"
+
+    echo $emitter_license
+    echo $emitter_secret_key
+
+    kubectl create secret generic -n openfaas emitter \
+      --from-literal emitter-license="$emitter_license" \
+      --from-literal emitter-secret-key="$emitter_secret_key"
+    helm install --set domain="$domain" --name emitter --namespace openfaas ~/iot/emitter/chart
+fi
+
+if [[ -z "$(helm ls metabase --output json)" ]]; then
+    helm repo add stable https://kubernetes-charts.storage.googleapis.com
+    helm repo update
+    helm install --name metabase --namespace openfaas stable/metabase
+fi
+
+if [[ -z "$(helm ls metabase-ingress --output json)" ]]; then
+    helm install --name metabase-ingress --set domain="$domain"  --namespace openfaas ~/iot/metabase/ingress
+fi
+
+if [[ -z "$(helm ls grafana --output json)" ]]; then
+    helm install --namespace openfaas --name grafana --set domain="$domain" ~/iot/grafana/chart
+fi
+
+function keygen {
+    local channel=$1 channel_key=''
+    emitter_secret_key=$(kubectl -n openfaas get secret emitter -o json | jq -r '.data["emitter-secret-key"]' | base64 -d)
+    while [[ $(echo -n "$channel_key" | wc -c) -ne 32 ]]; do
+        channel_key=$(kubectl -n openfaas run --rm -i -t keygen-$(date +%s) --image=$docker/iot-keygen:latest --restart=Never -- \
+            node /app/keygen.js -h emitter -p 8080 -k "$emitter_secret_key" -c "$channel" 2>/dev/null | head -n 1)
+    done
+    echo $channel_key
+}
+
+if [[ -z "$(kubectl -n openfaas-fn get secret emitter -o json)" ]]; then
+    drone_position_key=$(keygen "drone-position/")
+    drone_event_key=$(keygen "drone-event/")
+    control_event_key=$(keygen "control-event/")
+    kubectl create secret generic -n openfaas-fn emitter \
+      --from-literal drone-position-key="$drone_position_key" \
+      --from-literal drone-event-key="$drone_event_key" \
+      --from-literal control-event-key="$control_event_key"
+    git clone https://github.com/openfaas-incubator/mqtt-connector ~/mqtt-connector
+    pushd ~/mqtt-connector/chart
+    set "drone-position/ $drone_position_key"
+    helm template --name drone-position --namespace openfaas mqtt-connector/ --values mqtt-connector/values.yaml  \
+      --set trimChannelKey=false \
+      --set topic=$drone_position_key \
+      --set broker=tcp://emitter:8080 \
+    | kubectl apply -f -
+    set "drone-event/ $drone_event_key"
+    helm template --name drone-event --namespace openfaas mqtt-connector/ --values mqtt-connector/values.yaml  \
+      --set trimChannelKey=false \
+      --set topic=$drone_event_key \
+      --set broker=tcp://emitter:8080 \
+    | kubectl apply -f -
+    popd > /dev/null
+fi
+
+postgres_password=$(kubectl get secret --namespace default postgresql -o jsonpath="{.data.postgresql-password}" | base64 --decode)
+kubectl run postgresql-client-$(date +%s) --rm -i --restart='Never' --namespace default --image docker.io/bitnami/postgresql:11.6.0-debian-9-r0 \
+    --env="PGPASSWORD=$postgres_password" --command -- sh -c 'psql --host postgresql -U postgres -d postgres -p 5432' < ~/iot/openfaas/services/schema.sql
+
+# Forward the OpenFaaS port.
+kubectl port-forward -n openfaas svc/gateway 8085:8080 &
+forwards+=("$!")
+echo "forwards" ${forwards[@]}
+
+# Wait for OpenFaaS to become available.
+export OPENFAAS_URL=http://127.0.0.1:8085
+while ! curl -df "$OPENFAAS_URL" > /dev/null; do
+    echo "Waiting for OpenFaaS port forwarding."
+    sleep 1
+done
+export DOCKER_USER=$docker
+
+# Deploy drone functions.
+pushd ~/iot/openfaas/services > /dev/null
+PASSWORD=$(kubectl get secret -n openfaas basic-auth -o jsonpath="{.data.basic-auth-password}" | base64 --decode; echo)
+echo -n $PASSWORD | faas-cli login --username admin --password-stdin
+faas-cli template pull
+faas-cli deploy
+popd > /dev/null
+
+if [[ -z "$(kubectl get namespace cert-manager -o json 2>/dev/null)" ]]; then
+    kubectl create namespace cert-manager
+fi
+
+if [[ -z "$(helm ls cert-manager --output json 2>/dev/null)" ]]; then
+    kubectl apply --validate=false -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.12/deploy/manifests/00-crds.yaml
+    helm repo add jetstack https://charts.jetstack.io
+    helm repo update
+    helm install --name cert-manager --namespace cert-manager jetstack/cert-manager
+    kubectl rollout status -w -n cert-manager deploy/cert-manager-webhook
+    kubectl rollout status -w -n cert-manager deploy/cert-manager
+    sleep 10
+    k3sup app install openfaas-ingress --domain gateway."$domain" --email "$email" --ingress-class traefik
+fi
