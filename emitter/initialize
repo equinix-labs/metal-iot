@@ -1,0 +1,21 @@
+domain=$1
+
+if [[ -z "$(kubectl -n openfaas get secrets -o json | jq '.items[] | select(.metadata.name == "emitter")')" ]]; then
+    emitter_keys=()
+
+    while read -r line; do
+        emitter_keys+=("$line")
+    done < <(kubectl run --rm -i -t emitter --image=emitter/server:latest --restart=Never | awk '/generated/ { print $NF }')
+
+    emitter_license="${emitter_keys[0]}"
+    emitter_secret_key="${emitter_keys[1]}"
+
+    echo $emitter_license
+    echo $emitter_secret_key
+
+    kubectl create secret generic -n openfaas emitter \
+      --from-literal emitter-license="$emitter_license" \
+      --from-literal emitter-secret-key="$emitter_secret_key"
+
+    helm install --set domain="$domain" --name emitter --namespace openfaas chart
+fi
