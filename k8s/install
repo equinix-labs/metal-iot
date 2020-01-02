@@ -178,7 +178,7 @@ if [[ -z "$(kubectl -n openfaas get secrets -o json | jq '.items[] | select(.met
     helm install --set domain="$domain" --name emitter --namespace openfaas ~/iot/emitter/chart
 fi
 
-if [[ -z "$(helm ls metabase --output json)" ]]; then
+if [[ -z "$(helm ls --output json | jq '.Releases[] | select(.Name == "metabase")')" ]]; then
     helm repo add stable https://kubernetes-charts.storage.googleapis.com
     helm repo update
     helm install --name metabase --namespace openfaas stable/metabase
@@ -215,13 +215,13 @@ if [[ -z "$(kubectl -n openfaas-fn get secret emitter -o json)" ]]; then
     set "drone-position/ $drone_position_key"
     helm template --name drone-position --namespace openfaas mqtt-connector/ --values mqtt-connector/values.yaml  \
       --set trimChannelKey=false \
-      --set topic=$drone_position_key \
+      --set topic="$drone_position_key/drone-position/" \
       --set broker=tcp://emitter:8080 \
     | kubectl apply -f -
     set "drone-event/ $drone_event_key"
     helm template --name drone-event --namespace openfaas mqtt-connector/ --values mqtt-connector/values.yaml  \
       --set trimChannelKey=false \
-      --set topic=$drone_event_key \
+      --set topic="$drone_event_key/drone-event/" \
       --set broker=tcp://emitter:8080 \
     | kubectl apply -f -
     popd > /dev/null
@@ -263,6 +263,54 @@ if [[ -z "$(helm ls cert-manager --output json 2>/dev/null)" ]]; then
     helm install --name cert-manager --namespace cert-manager jetstack/cert-manager
     kubectl rollout status -w -n cert-manager deploy/cert-manager-webhook
     kubectl rollout status -w -n cert-manager deploy/cert-manager
-    sleep 10
+    kubectl -n cert-manager port-forward svc/cert-manager-webhook 8443:443 &
+    forwards+=("$!")
+    while [[ "$(curl -k -o /dev/null -s -w "%{http_code}" https://127.0.0.1:8443)" != 404 ]]; do
+        echo "waiting for cert manager webhook"
+        sleep 5
+    done
     k3sup app install openfaas-ingress --domain gateway."$domain" --email "$email" --ingress-class traefik
+fi
+
+function controller_pod {
+cat <<EOF
+apiVersion: v1
+kind: Pod
+metadata:
+  name: drone-controller
+  namespace: openfaas-fn
+  labels:
+    app: drone
+spec:
+  terminationGracePeriodSeconds: 5
+  containers:
+  - name: controller
+    imagePullPolicy: Always
+    image: $docker/iot-controller
+    env:
+    - name: CHANNEL_KEY_DRONE_EVENT
+      valueFrom:
+        secretKeyRef:
+          name: emitter
+          key: drone-event-key
+    - name: CHANNEL_KEY_DRONE_POSITION
+      valueFrom:
+        secretKeyRef:
+          name: emitter
+          key: drone-position-key
+    - name: CHANNEL_KEY_CONTROL_EVENT
+      valueFrom:
+        secretKeyRef:
+          name: emitter
+          key: control-event-key
+    - name: EMITTER_HOST
+      value: emitter.openfaas.svc.cluster.local
+    command: [ 'node', '-r', 'esm', 'build/app.js' ]
+EOF
+}
+
+controller_pod
+
+if [[ -z "$(kubectl -n openfaas-fn get pods drone-controller -o json 2>/dev/null)" ]]; then
+    controller_pod | kubectl create -f -
 fi

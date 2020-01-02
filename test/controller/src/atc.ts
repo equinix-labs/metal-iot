@@ -133,10 +133,10 @@ export class TrafficController {
                         this.setAltitude(message.data.name, 300);
                     }
 
-                    // pause and reduce altitude
+                    // reduce altitude to avoid weather
                     if (message.type === "system_warning") {
                         console.log("%s sent warning - adjusting for conditions", message.data.name);
-                        this.handleWarning(message.data.name);
+                        this.setAltitude(message.data.name, 50);
                     }
 
                     // return to hangar
@@ -187,9 +187,9 @@ export class TrafficController {
         });
     }
 
-    public async handleWarning( drone: string ) {
+    public async tempPause( drone: string ) {
         // pause drone for 30 seconds to allow condition to clear
-        console.log("Pausing %s and lowering altitude", drone);
+        console.log("Reducing altitude and speed", drone);
         this.pauseDrone(drone);
         this.setAltitude(drone, 50);
         await new Promise((resolve) => setTimeout(resolve, 30000));

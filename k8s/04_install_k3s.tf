@@ -9,6 +9,17 @@ data "template_file" "k3s_install_script" {
     }
 }
 
+data "template_file" "demo_install_script" {
+  template = file("install_start")
+  vars = {
+    domain_name = base64encode(var.domain_name)
+    repo = base64encode(var.repo)
+    branch = base64encode(var.branch)
+    email = base64encode(var.email)
+    docker_hub = base64encode(var.docker_hub)
+  }
+}
+
 resource "null_resource" "install_k3s" {
     count = length(packet_device.k3s_nodes)
     connection {
@@ -30,3 +41,27 @@ resource "null_resource" "install_k3s" {
     }
 }
 
+resource "null_resource" "install_demo" {
+  triggers = {
+    before = "x${join(",", null_resource.install_k3s[*].id)}"
+  }
+  connection {
+    type = "ssh"
+    user = "root"
+    private_key = chomp(tls_private_key.ssh_key.private_key_pem)
+    host = packet_device.k3s_nodes[0].access_public_ipv4
+  }
+  provisioner "file" {
+    source = "install"
+    destination = "/tmp/demo_install.sh"
+  }
+  provisioner "file" {
+      content = data.template_file.demo_install_script.rendered
+      destination = "/tmp/demo_install_start.sh"
+  }
+  provisioner "remote-exec" {
+      inline = [
+          "bash /tmp/demo_install_start.sh"
+      ]
+  }
+}

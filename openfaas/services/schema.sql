@@ -7,9 +7,17 @@ CREATE TABLE drone_position (
     id                INT GENERATED ALWAYS AS IDENTITY,
     name              text not null,
     location          point not null,
+    latitude          double precision not null,
+    longitude         double precision not null,
     destination       point not null,
     temp_celsius      double precision not null,
     battery_percent   int not null,
+    battery_drain     double precision not null,
+    speed             int not null,
+    bearing           double precision not null,
+    altitude          double precision not null,
+    payload_percent   int not null,
+    status            text not null,
     created           timestamp with time zone default now()
 );
 
@@ -20,6 +28,12 @@ CREATE TABLE drone_event (
     name              text not null,
     hangar            text not null,
     warehouse         text not null,
+    battery_percent   int not null,
+    battery_consumed  int not null,
+    location          point not null,
+    latitude          double precision not null,
+    longitude         double precision not null,
+    payload           int not null,
     created           timestamp with time zone default now()
 );
 

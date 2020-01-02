@@ -1,0 +1,9 @@
+#!/bin/bash
+
+domain_name=$(echo "${domain_name}" | base64 -d)
+repo=$(echo "${repo}" | base64 -d)
+branch=$(echo "${branch}" | base64 -d)
+email=$(echo "${email}" | base64 -d)
+docker_hub=$(echo "${docker_hub}" | base64 -d)
+
+bash /tmp/demo_install.sh -d "$domain_name" -r "$repo" -b "$branch" -D "$docker_hub" -e "$email"
