@@ -41,3 +41,22 @@ variable "billing_cycle" {
   default = "hourly"
 }
 
+variable "repo" {
+  description = "GitHub repo to use for demo source."
+}
+
+variable "email" {
+  description = "E-mail address to use for certificate registration."
+}
+
+variable "branch" {
+  description = "GitHub branch to use for demo source."
+}
+
+variable "docker_hub" {
+  description = "Docker Hub user name from which to pull demo images."
+}
+
+variable "domain_name" {
+  description = "Domain name to use for SSL certificate generation."
+}

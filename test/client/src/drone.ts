@@ -2,6 +2,8 @@ import { connect, ConnectRequest, Emitter, EmitterMessage } from "emitter-io";
 import LatLon from "geodesy/latlon-spherical.js";
 import { Hangar } from "./hangar";
 import { Delivery, Warehouse } from "./warehouse";
+import { Weather } from "./weather";
+
 
 const MAX_PAYLOAD_BATT_DRAIN: number = .005;     // max batt drain (%/s) at max payload
 const BASE_BATT_DRAIN: number = .00005;     // max batt drain (%/s) at max payload
@@ -19,14 +21,8 @@ interface Location {
 
 interface EventData {
     message: string;
-    name: string;
-    batteryPercent?: number;
     batteryConsumed?: number;
-    event?: string;
-    hangar?: string;
-    location?: Location;
-    payload?: number;
-    warehouse?: string;
+    packagePayload?: number;
 }
 
 interface ControlEvent {
@@ -73,7 +69,10 @@ export class Drone {
     private ctlCancel: boolean;     // flag indicating the drone operation is cancelled
     private ctlAltitude: number;    // the desired altitude for operation
 
-    constructor(id: string, name: string, hangar: Hangar, power: number) {
+    private weather: Weather;
+    private badBattery: boolean;
+
+    constructor(id: string, name: string, hangar: Hangar, power: number, weather: Weather, badBattery=false) {
         this.id = id;
         this.name = name;
         this.hangar = hangar;
@@ -101,6 +100,9 @@ export class Drone {
         this.ctlPause = false;
         this.ctlCancel = false;
         this.ctlAltitude = 300;
+
+        this.weather = weather;
+        this.badBattery = badBattery;
     }
 
     // take off an begin delivering packages from warehouse
@@ -120,7 +122,7 @@ export class Drone {
             return;
         }
         this.client = connect(broker, () => {
-            console.log("%s lifting off", this.name);
+            console.log("%s lifting off with ", this.name, this.badBattery ? "weak battery" : "good battery");
 
             // tslint:disable-next-line: no-unused-expression
             this.client && this.client.subscribe({
@@ -139,9 +141,7 @@ export class Drone {
                     console.log(message);
                     console.log("%s received control event %s", this.name, message.type);
                     this.sendEvent("control_event_rx", {
-                        event: message.type,
-                        message: "control event received",
-                        name: this.name,
+                        message: message.type + " control event received",
                     });
                 } else {
                     return;
@@ -164,10 +164,7 @@ export class Drone {
             });
 
             this.sendEvent("drone_deployed", {
-                hangar: this.hangar.name,
                 message: "Drone now active",
-                name: this.name,
-                warehouse: this.warehouse && this.warehouse.name || "unassigned",
             });
             this.active = true;
             this.run();
@@ -208,14 +205,8 @@ export class Drone {
                 this.completed.push(delivery);
                 this.sendEvent("package_delivered", {
                     batteryConsumed: Math.floor(delivery.batteryConsumed * 100),
-                    location: {
-                        lat: delivery.dest.lat,
-                        lon: delivery.dest.lon,
-                    },
                     message: "Package has been delivered",
-                    name: this.name,
-                    payload: Math.floor(delivery.payload * 100),
-                    warehouse: this.warehouse && this.warehouse.name || "unassigned",
+                    packagePayload: Math.floor(delivery.payload * 100),
                 });
             }
         }, () => {
@@ -234,14 +225,8 @@ export class Drone {
                 // save the starting battery level, we'll calculate consumption once we drop
                 element.batteryConsumed = this.battery;
                 this.sendEvent("package_loaded", {
-                    location: {
-                        lat: element.dest.lat,
-                        lon: element.dest.lon,
-                    },
                     message: "Package has been loaded",
-                    name: this.name,
-                    payload: Math.floor(element.payload * 100),
-                    warehouse: this.warehouse && this.warehouse.name || "unassigned",
+                    packagePayload: Math.floor(element.payload * 100),
                 });
             });
         }, () => {
@@ -259,7 +244,20 @@ export class Drone {
             channel: "drone-event",
             key: process.env.CHANNEL_KEY_DRONE_EVENT || "",
             message: JSON.stringify({
-                data: eventData,
+                data: {
+                    batteryConsumed: eventData.batteryConsumed || 0,
+                    batteryPercent: Math.floor(this.battery * 100),
+                    hangar: this.hangar.name,
+                    location: {
+                        lat: this.location.lat,
+                        lon: this.location.lon,
+                    },
+                    message: eventData.message,
+                    name: this.name,
+                    packagePayload: eventData.packagePayload || 0,
+                    payload: Math.floor(this.jobs.reduce((sum, job) => sum + job.payload, 0) * 100),
+                    warehouse: this.warehouse && this.warehouse.name || "unassigned",
+                },
                 type: eventType,
             }),
         });
@@ -284,8 +282,23 @@ export class Drone {
 
     private processState() {
         // calculate the new state based on our last state
+        let battDrain = 1;
+        if (this.weather.isWindy(this.location, this.altitude)) {
+            // send event and drain battery hard
+            console.log("%s Flying in windy area", this.name);
+            battDrain = 3;
+            this.sendEvent("system_warning", {
+                message: "High Wind Warning",
+            });
+        }
+        if (this.badBattery) {
+            // cause some random accelerated drainage
+            battDrain = battDrain + Math.random() * 2;
+        }
+
         const payload = this.jobs.reduce((sum, job) => sum + job.payload, 0);
-        this.battery = Math.max(this.battery - (MAX_PAYLOAD_BATT_DRAIN * payload) - BASE_BATT_DRAIN, .01);
+        const batteryConsumed = (MAX_PAYLOAD_BATT_DRAIN * payload * battDrain) - BASE_BATT_DRAIN;
+        this.battery = Math.max(this.battery - batteryConsumed, .01);
         this.location = this.location.destinationPoint(this.calcDistanceTraveled(1), this.bearing);
         this.bearing = this.location.initialBearingTo(this.dest) || 0;
         this.speed = Math.min(this.power * 10, Math.max(this.speed + this.accel, 0));
@@ -299,6 +312,7 @@ export class Drone {
             key: process.env.CHANNEL_KEY_DRONE_POSITION || "",
             message: JSON.stringify({
                 altitude: this.altitude,
+                batteryDrain: batteryConsumed,
                 batteryPercent: Math.floor(this.battery * 100),
                 bearing: this.bearing,
                 destination: {
@@ -328,9 +342,7 @@ export class Drone {
                 this.dest !== this.hangar.location) {
             // divert to hangar if battery gets low while returning to warehouse
             this.sendEvent("low_battery", {
-                batteryPercent: Math.floor(this.battery * 100),
                 message: "Battery is low, returning to charge",
-                name: this.name,
             });
             console.log("%s has low battery, diverting to hangar...", this.name);
             this.goTo(this.hangar.location);
@@ -376,60 +388,35 @@ export class Drone {
         if (Math.random() > .999) {
             // .1% chance of high wind
             this.sendEvent("system_warning", {
-                location: {
-                    lat: this.location.lat,
-                    lon: this.location.lon,
-                },
                 message: "High Wind Warning",
-                name: this.name,
             });
         }
 
         if (Math.random() > .999) {
             // .1% chance of battery overheating
             this.sendEvent("system_warning", {
-                location: {
-                    lat: this.location.lat,
-                    lon: this.location.lon,
-                },
                 message: "High Battery Temperature",
-                name: this.name,
             });
         }
 
         if (Math.random() > .99995) {
             // .005% chance of motor running inefficient
             this.sendEvent("system_error", {
-                location: {
-                    lat: this.location.lat,
-                    lon: this.location.lon,
-                },
                 message: "Motor Overcurrent",
-                name: this.name,
             });
         }
 
         if (Math.random() > .9999) {
             // .01% chance of gps sensor malfunction
             this.sendEvent("system_error", {
-                location: {
-                    lat: this.location.lat,
-                    lon: this.location.lon,
-                },
                 message: "GPS Sensor Malfunction",
-                name: this.name,
             });
         }
 
         if (Math.random() > .9999) {
             // .01% chance of gyro sensor malfunction
             this.sendEvent("system_error", {
-                location: {
-                    lat: this.location.lat,
-                    lon: this.location.lon,
-                },
                 message: "Gyro Sensor Malfunction",
-                name: this.name,
             });
         }
     }
@@ -442,10 +429,7 @@ export class Drone {
             await new Promise((resolve) => setTimeout(resolve, 1000));
         }
         await this.sendEvent("drone_grounded", {
-            batteryPercent: Math.floor(this.battery * 100),
-            hangar: this.hangar.name,
             message: "Drone returned to hangar",
-            name: this.name,
         });
         console.log("%s returned to hangar...", this.name);
         // tslint:disable-next-line: no-unused-expression
