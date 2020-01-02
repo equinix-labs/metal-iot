@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: drone-controller
+  namespace: openfaas-fn
+  labels:
+    app: drone
+spec:
+  terminationGracePeriodSeconds: 5
+  containers:
+  - name: controller
+    imagePullPolicy: Always
+    image: kitklein/drone-con
+    env:
+    - name: CHANNEL_KEY_DRONE_EVENT
+      valueFrom:
+        secretKeyRef:
+          name: emitter
+          key: drone-event-key
+    - name: CHANNEL_KEY_DRONE_POSITION
+      valueFrom:
+        secretKeyRef:
+          name: emitter
+          key: drone-position-key
+    - name: CHANNEL_KEY_CONTROL_EVENT
+      valueFrom:
+        secretKeyRef:
+          name: emitter
+          key: control-event-key
+    - name: EMITTER_HOST
+      value: emitter.openfaas.svc.cluster.local
+    command: [ 'node', '-r', 'esm', 'build/app.js' ]
