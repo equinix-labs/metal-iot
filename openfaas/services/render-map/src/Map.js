@@ -26,7 +26,8 @@ export class Map extends React.Component {
             apiBaseUrl = "";
         }
 
-        var url = baseURL+ apiBaseUrl + "/function/db-reader.openfaas-fn/positions-geojson";
+        var url = baseURL + apiBaseUrl + "/function/db-reader.openfaas-fn/positions-geojson";
+        var publisherUrl = baseURL + apiBaseUrl + "/function/mqtt-publisher.openfaas-fn";
 
         this.map = new mapboxgl.Map({
             container: this.mapContainer,
@@ -218,15 +219,29 @@ export class Map extends React.Component {
                 });
             });
 
+            let controlContainer = document.getElementsByClassName("mapboxgl-control-container");
+
             this.map.on('click', 'drones', function(e) {
-              let coordinates = e.features[0].geometry.coordinates.slice();
-              let title = e.features[0].properties.title;
-              let description = e.features[0].properties.description;
-              new mapboxgl.Popup()
-                .setLngLat(coordinates)
-                .setHTML(`<h2>${title}</h2>${description}`)
-                .addTo(this.map);
+                let coordinates = e.features[0].geometry.coordinates.slice();
+                let title = e.features[0].properties.title;
+                let description = e.features[0].properties.description;
+                let popup = new mapboxgl.Popup()
+                    .setLngLat(coordinates)
+                    .setHTML(`<h2>${title}</h2>${description}<br><button type="button" id="return-to-hangar">Return to hangar</button>`)
+                    .addTo(this.map);
+                let returnToHangar = document.getElementById("return-to-hangar")
+                returnToHangar.addEventListener('click', function(e) {
+                    popup.remove();
+                    fetch(publisherUrl, {
+                        method: 'POST',
+                        headers: { 'Content-type': 'application/json' },
+                        body: JSON.stringify({ data: {}, filter: { name: title }, type: 'cancel' })
+                    })
+                    alert(`Message sent to ${title} to return to hangar.`)
+                })
             }.bind(this))
+
+
 
         });
     }
