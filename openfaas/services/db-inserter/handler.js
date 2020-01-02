@@ -68,10 +68,10 @@ async function insertPosition(client, name, location, destination, tempCelsius, 
 
 async function insertEvent(client, eventType, data) {
     console.error('event', eventType, data)
-    const { message, name, hanger, warehouse } = data
+    const { message, name, hangar, warehouse } = data
     let res = await client.query(`insert into drone_event (
         event_type, message, name, hangar, warehouse
-    ) values ($1, $2, $3, $4, $5);`, [eventType, message, name, hanger, warehouse]);
+    ) values ($1, $2, $3, $4, $5);`, [eventType, message, name, hangar, warehouse]);
     return res.rowCount;
 }
 

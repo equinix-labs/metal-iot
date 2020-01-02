@@ -12,9 +12,9 @@ const controller = new TrafficController({
     host: process.env.EMITTER_HOST || "127.0.0.1",
     port: parseInt(process.env.EMITTER_PORT || "8080"),
     channels: {
-        "control-event": process.env.CHANNEL_KEY_DRONE_POSITION || "",
-        "drone-position": process.env.CHANNEL_KEY_DRONE_POSITION || "",
+        "control-event": process.env.CHANNEL_KEY_CONTROL_EVENT|| "",
         "drone-event": process.env.CHANNEL_KEY_DRONE_EVENT || "",
+        "drone-position": process.env.CHANNEL_KEY_DRONE_POSITION || "",
     }
 });
 
