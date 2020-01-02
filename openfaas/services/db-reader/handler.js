@@ -6,7 +6,7 @@ const fs = require('fs')
 
 const pool = initPool()
 
-module.exports = async (event, context) => {  
+module.exports = async (event, context) => {
     let client = await pool.connect()
 
     if(event.method == "GET") {
@@ -34,9 +34,9 @@ module.exports = async (event, context) => {
                         },
                         'properties': {
                             "title": l.name,
-                            "description": l.name,
+                            "description": `<dl><dt>Location:</dt><dd>Lat: ${l.location.x}</dd><dd>Long: ${l.location.y}</dd><dt>Destination:</dt><dd>Lat: ${l.destination.x}</dd><dd>Long: ${l.destination.y}</dd></dl><div>Temperature: ${l.temp_celsius.toFixed(2)}&#8451;</div><div>Battery: ${l.battery_percent}%</div><a href="#" class="send-to-hangar">Send to hangar</a>`,
                             "icon": "airfield"
-                            }
+                        }
                     });
                 });
                 let payload = {
@@ -63,7 +63,7 @@ async function selectEvents(client) {
 }
 
 async function selectPositions(client) {
-    let res = await client.query(`select * from get_latest_positions();`)
+    let res = await client.query(`select * from get_latest_positions() ORDER BY name;`)
     return res;
 }
 

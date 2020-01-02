@@ -26,7 +26,7 @@ export class Map extends React.Component {
             apiBaseUrl = "";
         }
 
-        var url = baseURL+ apiBaseUrl + "/function/db-reader/positions-geojson";
+        var url = baseURL+ apiBaseUrl + "/function/db-reader.openfaas-fn/positions-geojson";
 
         this.map = new mapboxgl.Map({
             container: this.mapContainer,
@@ -35,6 +35,8 @@ export class Map extends React.Component {
             center: [this.state.lng, this.state.lat],
             zoom: this.state.zoom
         });
+
+        this.map.addControl(new mapboxgl.NavigationControl());
 
         this.map.on('load', () => {
             window.setInterval(function() {
@@ -46,6 +48,43 @@ export class Map extends React.Component {
                 data: url,
                 // cluster: true
             });
+
+            /*
+            let l = {
+              temp_celsius: 25.1391496933256,
+              battery_percent: 98,
+              location: {
+                x: -115.125846,
+                y: 36.240648
+              },
+              destination: {
+                x: -115.12396469988,
+                y: 36.2337435706823
+              }
+            }
+
+            this.map.addSource('drones', {
+                type: 'geojson',
+                data: {
+                  type: "FeatureCollection",
+                  features: [{
+                    "type": "Feature",
+                    "geometry": {
+                      "type": "Point",
+                      "coordinates": [
+                        -115.174320057414,
+                        36.2634030641911
+                      ]
+                    },
+                    "properties": {
+                      "title": "cylon 0",
+                      "description": `<dl><dt>Location:</dt><dd>Lat: ${l.location.x}</dd><dd>Long: ${l.location.y}</dd><dt>Destination:</dt><dd>Lat: ${l.destination.x}</dd><dd>Long: ${l.destination.y}</dd></dl><div>Temperature: ${l.temp_celsius.toFixed(2)}&#8451;</div><div>Battery: ${l.battery_percent}%</div><a href="${sendToHangar}" class="send-to-hangar">Send to hangar</a>`,
+                      "icon": "airfield"
+                    }
+                  }]
+                }
+            });
+            */
 
             this.map.addLayer({
               'id': 'hangar',
@@ -114,7 +153,7 @@ export class Map extends React.Component {
             })
 
             this.map.addLayer({
-                'id': 'drone',
+                'id': 'drones',
                 'type': 'symbol',
                 'source': 'drones',
                 'layout': {
@@ -178,6 +217,17 @@ export class Map extends React.Component {
                     zoom: this.map.getZoom().toFixed(2)
                 });
             });
+
+            this.map.on('click', 'drones', function(e) {
+              let coordinates = e.features[0].geometry.coordinates.slice();
+              let title = e.features[0].properties.title;
+              let description = e.features[0].properties.description;
+              new mapboxgl.Popup()
+                .setLngLat(coordinates)
+                .setHTML(`<h2>${title}</h2>${description}`)
+                .addTo(this.map);
+            }.bind(this))
+
         });
     }
 
