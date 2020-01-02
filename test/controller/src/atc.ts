@@ -10,6 +10,7 @@ interface ControlEvent {
         hangar?: string[];
     };
     data: {
+        message: string;
         altitude?: number;
     };
 }
@@ -118,83 +119,82 @@ export class TrafficController {
                     // drones return to warehouse at 200 meters
                     if (message.type === "package_delivered") {
                         console.log("%s delivered package - adjusting altitude", message.data.name);
-                        this.setAltitude(message.data.name, 200);
+                        this.setAltitude(message.data.name, 200, "ATC adjusting target altitude to 200 for return to warehouse");
                     }
 
                     // drones deliver at 100 meters
                     if (message.type === "package_loaded") {
                         console.log("%s loaded package - adjusting altitude", message.data.name);
-                        this.setAltitude(message.data.name, 200);
+                        this.setAltitude(message.data.name, 150, "ATC adjusting target altitude to 150 for package delivery");
                     }
 
                     // drones return to hangar at 300 meters
                     if (message.type === "low_battery") {
                         console.log("%s returning to hangar - adjusting altitude", message.data.name);
-                        this.setAltitude(message.data.name, 300);
+                        this.setAltitude(message.data.name, 300, "ATC adjusting target altitude to 300 for return to hangar");
                     }
 
                     // reduce altitude to avoid weather
                     if (message.type === "system_warning") {
                         console.log("%s sent warning - adjusting for conditions", message.data.name);
-                        this.setAltitude(message.data.name, 50);
+                        this.setAltitude(message.data.name, 50, "ATC reducing altitude to avoid windy conditions");
                     }
 
                     // return to hangar
                     if (message.type === "system_error") {
                         console.log("%s sent error - cancelling", message.data.name);
-                        this.setAltitude(message.data.name, 300);
-                        this.cancelDrone(message.data.name);
+                        this.setAltitude(message.data.name, 300, "Adjusting target altitude to 300 for return to hangar");
+                        this.cancelDrone(message.data.name, "ATC detected system error - returning drone to hangar");
                     }
                 }
             });
         });
     }
 
-    public async setAltitude( drone: string, alt: number) {
+    public async setAltitude( drone: string, alt: number, reason: string) {
         // tslint:disable-next-line: no-unused-expression
         this.drones[drone].altitude = alt;
         this.sendControlEvent({
-            data: {altitude: alt},
+            data: {
+                altitude: alt,
+                message: reason,
+            },
             filter: {name: [drone]},
             type: "set_altitude",
         });
     }
 
-    public async pauseDrone( drone: string) {
+    public async pauseDrone( drone: string, reason: string ) {
         // tslint:disable-next-line: no-unused-expression
         this.sendControlEvent({
-            data: {},
+            data: {
+                message: reason,
+            },
             filter: {name: [drone]},
             type: "pause",
         });
     }
 
-    public async resumeDrone( drone: string) {
+    public async resumeDrone( drone: string, reason: string ) {
         // tslint:disable-next-line: no-unused-expression
         this.sendControlEvent({
-            data: {},
+            data: {
+                message: reason,
+            },
             filter: {name: [drone]},
             type: "resume",
         });
     }
 
-    public async cancelDrone( drone: string) {
+    public async cancelDrone( drone: string, reason: string ) {
         // tslint:disable-next-line: no-unused-expression
         this.sendControlEvent({
-            data: {},
+            data: {
+                message: reason,
+            },
             filter: {name: [drone]},
             type: "cancel",
         });
-    }
-
-    public async tempPause( drone: string ) {
-        // pause drone for 30 seconds to allow condition to clear
-        console.log("Reducing altitude and speed", drone);
-        this.pauseDrone(drone);
-        this.setAltitude(drone, 50);
-        await new Promise((resolve) => setTimeout(resolve, 30000));
-        console.log("%s resuming operation", drone);
-        this.resumeDrone(drone);
     }
 
     public async monitor() {
@@ -225,6 +225,7 @@ export class TrafficController {
     private async detectCollision( name: string, position: Position ) {
         // check trajectory for airspace conflicts
         const conflicts = [];
+        const conflictNames = [];
 
         for ( const [otherName, other] of Object.entries(this.drones)) {
             if (otherName === name) {
@@ -279,6 +280,7 @@ export class TrafficController {
                 console.log(intersectionTo);
                 console.log(intersectionFrom);
                 conflicts.push(other);
+                conflictNames.push(otherName);
             }
         }
 
@@ -318,6 +320,7 @@ export class TrafficController {
             name, position.altitude, options[0]);
 
         // adjust the drone
-        this.setAltitude(name, options[0]);
+        this.setAltitude(name, options[0], "ATC adjusting altitude to " 
+            + options[0] + " to avoid collision(s) with " + conflictNames.toString());
     }
 }
