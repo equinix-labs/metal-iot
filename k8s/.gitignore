@@ -1,6 +1,7 @@
 /.terraform
 /kubeconfig
 /override.tf
+/terraform.tfvars
 /ssh_priv_key
 terraform.tfstate*
 
