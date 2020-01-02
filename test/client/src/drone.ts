@@ -33,6 +33,7 @@ interface ControlEvent {
         hangar?: string[];
     };
     data: {
+        message?: string;
         altitude?: number;
     };
 }
@@ -141,7 +142,7 @@ export class Drone {
                     console.log(message);
                     console.log("%s received control event %s", this.name, message.type);
                     this.sendEvent("control_event_rx", {
-                        message: message.type + " control event received",
+                        message: message.data.message || "Control Event received",
                     });
                 } else {
                     return;

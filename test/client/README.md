@@ -1,9 +1,10 @@
 # Drone Sim
 
-This project simulates clusters of drones delivering packages from warehouses to surrounding areas.  The code has three main modules
+This project simulates clusters of drones delivering packages from warehouses to surrounding areas.  The code has four main modules
 1. hangar - represents an instance of a hangar for storing/recharging drones.  Hangars can deploy drones to warehouses.  When a drone has low battery it will return to the hangar.
 2. warehouse - represents an instance of a warehouse which distributes packages to be delivered in the surrounding region.  Warehouses hand randomized delivery jobs to drones.
-3. drone - represents a drone which completes deliver jobs.  Drones exhibit semi-realistic flight trajectory and battery drain.  Battery drain is impacted by the size of packages being delivered (payload).
+3. weather - respsentes regions of high wind.  Drones entering these regions will experience accelerated battery drain.
+4. drone - represents a drone which completes deliver jobs.  Drones exhibit semi-realistic flight trajectory and battery drain.  Battery drain is impacted by the size of packages being delivered (payload).
 
 ## Getting Started
 
@@ -50,6 +51,8 @@ export EMITTER_PORT=8124
     node build/listener.js
     ```
 
+## Modifying Simuation Behavior
+The simulation allows you to specify the location of hangars, warehouses, and weather by updating [app.ts](/src/app.ts).   
 
 ## Drone Position Updates
 
