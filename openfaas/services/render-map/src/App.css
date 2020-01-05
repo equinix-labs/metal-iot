@@ -46,3 +46,29 @@ dd {
   margin: 0 0 10px 0;
   text-align: center;
 }
+
+.map-overlay-container {
+  position: absolute;
+  width: 20%;
+  top: 0;
+  left: 0;
+  padding: 10px;
+  z-index: 1;
+}
+
+.map-overlay {
+  font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+  background-color: #fff;
+  border-radius: 3px;
+  padding: 10px 20px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  text-align: left;
+}
+
+.map-overlay h2 {
+  margin: 0 0 10px;
+}
+
+.map-overlay .warehouse {
+  margin-bottom: 10px;
+}
