@@ -13,10 +13,6 @@ export class Map extends React.Component {
             lat: start.lat,
             zoom: 10
         };
-    }
-
-    componentDidMount() {
-        this.setState({isLoading: false});
 
         var baseURL, apiBaseUrl;
         if (process && process.env && process.env.NODE_ENV === 'development') {
@@ -27,8 +23,12 @@ export class Map extends React.Component {
             apiBaseUrl = "";
         }
 
-        var url = baseURL + apiBaseUrl + "/function/db-reader.openfaas-fn/positions-geojson";
+        this.positionsUrl = baseURL + apiBaseUrl + "/function/db-reader.openfaas-fn/positions-geojson";
         this.publisherUrl = baseURL + apiBaseUrl + "/function/mqtt-publisher.openfaas-fn";
+    }
+
+    componentDidMount() {
+        this.setState({isLoading: false});
 
         this.map = new mapboxgl.Map({
             container: this.mapContainer,
@@ -46,12 +46,12 @@ export class Map extends React.Component {
 
         map.on('load', () => {
             window.setInterval(function() {
-                map.getSource('drones').setData(url);
+                map.getSource('drones').setData(this.positionsUrl);
             }.bind(this), 1500);
 
             map.addSource('drones', {
                 type: 'geojson',
-                data: url,
+                data: this.positionsUrl,
                 // cluster: true
             });
 

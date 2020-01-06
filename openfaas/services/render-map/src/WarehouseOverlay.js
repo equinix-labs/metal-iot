@@ -12,24 +12,22 @@ export class WarehouseOverlay extends React.Component {
     }
 
     closeWarehouse(warehouse, e) {
-        console.log('close', warehouse)
-        /*
         fetch(this.publisherUrl, {
             method: 'POST',
             headers: { 'Content-type': 'application/json' },
-            body: JSON.stringify({ data: {}, filter: { name: null }, type: 'cancel' })
+            body: JSON.stringify({ data: {}, filter: { warehouse: warehouse.name }, type: 'cancel' })
         })
-        */
+        alert(`Cancelling all drones for ${warehouse.name} warehouse`)
     }
 
     render() {
         return (
-            <div class="map-overlay-container">
-                <div class="map-overlay">
+            <div className="map-overlay-container">
+                <div className="map-overlay">
                     <h2 id="location-title">Warehouses</h2>
                     {this.warehouses.map((warehouse, index) => {
                         return (
-                            <div class="warehouse" key={index}>
+                            <div className="warehouse" key={index}>
                                 <h3>{warehouse.name}</h3>
                                 <button type="button" onClick={(e) => this.closeWarehouse(warehouse, e)}>Close warehouse</button>
                             </div>
