@@ -1,5 +1,6 @@
 import React from 'react';
 import mapboxgl from 'mapbox-gl';
+import { WarehouseOverlay } from './WarehouseOverlay.js'
 
 export class Map extends React.Component {
     constructor(props) {
@@ -12,10 +13,6 @@ export class Map extends React.Component {
             lat: start.lat,
             zoom: 10
         };
-    }
-
-    componentDidMount() {
-        this.setState({isLoading: false});
 
         var baseURL, apiBaseUrl;
         if (process && process.env && process.env.NODE_ENV === 'development') {
@@ -26,8 +23,12 @@ export class Map extends React.Component {
             apiBaseUrl = "";
         }
 
-        var url = baseURL + apiBaseUrl + "/function/db-reader.openfaas-fn/positions-geojson";
-        var publisherUrl = baseURL + apiBaseUrl + "/function/mqtt-publisher.openfaas-fn";
+        this.positionsUrl = baseURL + apiBaseUrl + "/function/db-reader.openfaas-fn/positions-geojson";
+        this.publisherUrl = baseURL + apiBaseUrl + "/function/mqtt-publisher.openfaas-fn";
+    }
+
+    componentDidMount() {
+        this.setState({isLoading: false});
 
         this.map = new mapboxgl.Map({
             container: this.mapContainer,
@@ -37,16 +38,20 @@ export class Map extends React.Component {
             zoom: this.state.zoom
         });
 
-        this.map.addControl(new mapboxgl.NavigationControl());
+        let map = this.map
 
-        this.map.on('load', () => {
+        map.addControl(new mapboxgl.NavigationControl());
+
+        // let feature = map.queryRenderedFeatures({ layers: ['selected-drone'] })[0]
+
+        map.on('load', () => {
             window.setInterval(function() {
-                this.map.getSource('drones').setData(url);
+                map.getSource('drones').setData(this.positionsUrl);
             }.bind(this), 1500);
 
-            this.map.addSource('drones', {
+            map.addSource('drones', {
                 type: 'geojson',
-                data: url,
+                data: this.positionsUrl,
                 // cluster: true
             });
 
@@ -64,7 +69,7 @@ export class Map extends React.Component {
               }
             }
 
-            this.map.addSource('drones', {
+            map.addSource('drones', {
                 type: 'geojson',
                 data: {
                   type: "FeatureCollection",
@@ -78,16 +83,17 @@ export class Map extends React.Component {
                       ]
                     },
                     "properties": {
-                      "title": "cylon 0",
-                      "description": `<dl><dt>Location:</dt><dd>Lat: ${l.location.x}</dd><dd>Long: ${l.location.y}</dd><dt>Destination:</dt><dd>Lat: ${l.destination.x}</dd><dd>Long: ${l.destination.y}</dd></dl><div>Temperature: ${l.temp_celsius.toFixed(2)}&#8451;</div><div>Battery: ${l.battery_percent}%</div><a href="${sendToHangar}" class="send-to-hangar">Send to hangar</a>`,
-                      "icon": "airfield"
+                      "title": "dummy cylon",
+                      "description": `<dl><dt>Location:</dt><dd>Lat: ${l.location.x}</dd><dd>Long: ${l.location.y}</dd><dt>Destination:</dt><dd>Lat: ${l.destination.x}</dd><dd>Long: ${l.destination.y}</dd></dl><div>Temperature: ${l.temp_celsius.toFixed(2)}&#8451;</div><div>Battery: ${l.battery_percent}%</div>`,
+                      "icon": "airfield",
+                      "sick": true
                     }
                   }]
                 }
             });
             */
 
-            this.map.addLayer({
+            map.addLayer({
               'id': 'hangar',
               'type': 'symbol',
               'source': {
@@ -117,7 +123,7 @@ export class Map extends React.Component {
               }
             })
 
-            this.map.addLayer({
+            map.addLayer({
               'id': 'warehouses',
               'type': 'symbol',
               'source': {
@@ -130,6 +136,9 @@ export class Map extends React.Component {
                       'geometry': {
                         'type': 'Point',
                         'coordinates': [-115.124846, 36.250648]
+                      },
+                      'properties': {
+                          'title': 'NE Vegas'
                       }
                     },
                     {
@@ -137,6 +146,9 @@ export class Map extends React.Component {
                       'geometry': {
                         'type': 'Point',
                         'coordinates': [-115.290328, 36.246499]
+                      },
+                      'properties': {
+                          'title': 'NW Vegas'
                       }
                     }
                   ]
@@ -144,7 +156,7 @@ export class Map extends React.Component {
               },
               'layout': {
                 'icon-image': 'castle-11',
-                'text-field': 'Warehouse',
+                'text-field': ['get', 'title'],
                 'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
                 'text-offset': [0, 0.6],
                 'text-anchor': 'top',
@@ -153,13 +165,12 @@ export class Map extends React.Component {
               }
             })
 
-            this.map.addLayer({
+            map.addLayer({
                 'id': 'drones',
                 'type': 'symbol',
                 'source': 'drones',
                 'layout': {
                     'icon-image': 'airfield-11',
-                    // get the title name from the source's "title" property
                     'text-field': ['get', 'title'],
                     'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
                     'text-offset': [0, 0.6],
@@ -168,11 +179,13 @@ export class Map extends React.Component {
                     'icon-optional': true,
                     'text-allow-overlap': true,
                     'icon-ignore-placement': true
+                },
+                'paint': {
                 }
             });
 
             /*
-            this.map.addLayer({
+            map.addLayer({
                 'id': 'cluster',
                 'type': 'circle',
                 'source': 'drones',
@@ -192,7 +205,7 @@ export class Map extends React.Component {
                 }
             });
 
-            this.map.addLayer({
+            map.addLayer({
                 id: 'cluster-count',
                 type: 'symbol',
                 source: 'drones',
@@ -205,34 +218,32 @@ export class Map extends React.Component {
             });
             */
 
-            this.map.on('layeradd', function(e) {
+            map.on('layeradd', function(e) {
                 var marker = e.layer,
                     feature = marker.feature;
-                marker.setIcon(this.map.icon(feature.properties.icon));
+                marker.setIcon(map.icon(feature.properties.icon));
             });
 
-            this.map.on('move', () => {
+            map.on('move', () => {
                 this.setState({
-                    lng: this.map.getCenter().lng.toFixed(4),
-                    lat: this.map.getCenter().lat.toFixed(4),
-                    zoom: this.map.getZoom().toFixed(2)
+                    lng: map.getCenter().lng.toFixed(4),
+                    lat: map.getCenter().lat.toFixed(4),
+                    zoom: map.getZoom().toFixed(2)
                 });
             });
 
-            let controlContainer = document.getElementsByClassName("mapboxgl-control-container");
-
-            this.map.on('click', 'drones', function(e) {
+            map.on('click', 'drones', function(e) {
                 let coordinates = e.features[0].geometry.coordinates.slice();
                 let title = e.features[0].properties.title;
                 let description = e.features[0].properties.description;
                 let popup = new mapboxgl.Popup()
                     .setLngLat(coordinates)
                     .setHTML(`<h2>${title}</h2>${description}<br><button type="button" id="return-to-hangar">Return to hangar</button>`)
-                    .addTo(this.map);
+                    .addTo(map);
                 let returnToHangar = document.getElementById("return-to-hangar")
                 returnToHangar.addEventListener('click', function(e) {
                     popup.remove();
-                    fetch(publisherUrl, {
+                    fetch(this.publisherUrl, {
                         method: 'POST',
                         headers: { 'Content-type': 'application/json' },
                         body: JSON.stringify({ data: {}, filter: { name: title }, type: 'cancel' })
@@ -240,9 +251,6 @@ export class Map extends React.Component {
                     alert(`Message sent to ${title} to return to hangar.`)
                 })
             }.bind(this))
-
-
-
         });
     }
 
@@ -253,7 +261,8 @@ export class Map extends React.Component {
     render() {
         return (
             <div>
-            <div ref={el => this.mapContainer = el} className="mapContainer" />
+                <div ref={el => this.mapContainer = el} className="mapContainer" />
+                <WarehouseOverlay publisherUrl={this.publisherUrl} />
             </div>
         )
     }
