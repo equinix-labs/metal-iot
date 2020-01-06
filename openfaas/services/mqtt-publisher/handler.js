@@ -18,6 +18,8 @@ const publisher = new Publisher({
 module.exports = async (event, context) => {
     if (event.method == 'POST') {
         publisher.publish({ channel: 'control-event', message: event.body })
+        return context.status(200).succeed({"status": "Published"});
     }
+
     return context.status(200).succeed({"status": "No action"});
 }
