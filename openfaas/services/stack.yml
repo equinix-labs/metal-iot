@@ -7,7 +7,7 @@ functions:
   mqtt-publisher:
     lang: node12
     handler: ./mqtt-publisher
-    image: ${DOCKER_USER:-alexellis2}/mqtt-publisher:0.0.0
+    image: ${DOCKER_USER:-packetiotdemo}/mqtt-publisher:0.1.0
     labels:
       com.openfaas.scale.min: 0
       com.openfaas.scale.max: 10
@@ -17,7 +17,7 @@ functions:
   db-inserter:
     lang: node12
     handler: ./db-inserter
-    image: ${DOCKER_USER:-alexellis2}/db-inserter:0.3.7
+    image: ${DOCKER_USER:-packetiotdemo}/db-inserter:0.4.0
     annotations:
       topic: "drone-position/,drone-event/"
     environment:
@@ -32,7 +32,7 @@ functions:
   db-reader:
     lang: node12
     handler: ./db-reader
-    image: ${DOCKER_USER:-alexellis2}/db-reader:0.3.3
+    image: ${DOCKER_USER:-packetiotdemo}/db-reader:0.5.0
     environment:
       db_port: 5432
       db_name: postgres
@@ -46,7 +46,7 @@ functions:
   render-map:
     lang: dockerfile
     handler: ./render-map
-    image: ${DOCKER_USER:-alexellis2}/render-map:0.3.4
+    image: ${DOCKER_USER:-packetiotdemo}/render-map:0.4.0
     labels:
       com.openfaas.scale.min: 1
       com.openfaas.scale.max: 1
