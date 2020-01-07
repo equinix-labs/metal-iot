@@ -135,7 +135,7 @@ export class Map extends React.Component {
                       'type': 'Feature',
                       'geometry': {
                         'type': 'Point',
-                        'coordinates': [-115.124846, 36.250648]
+                        'coordinates': [-115.135846, 36.240648]
                       },
                       'properties': {
                           'title': 'NE Vegas'
@@ -145,7 +145,9 @@ export class Map extends React.Component {
                       'type': 'Feature',
                       'geometry': {
                         'type': 'Point',
-                        'coordinates': [-115.290328, 36.246499]
+                        // 'coordinates': [-115.290328, 36.246499]
+                        // 'coordinates': [-115.125846, 36.240648]
+                        'coordinates': [-115.268259, 36.264499]
                       },
                       'properties': {
                           'title': 'NW Vegas'
