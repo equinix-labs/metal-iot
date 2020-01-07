@@ -5,7 +5,7 @@ import { Warehouse } from "./warehouse";
 import { Weather, Zone } from "./weather";
 
 const distNE = new Warehouse("NE Vegas", new LatLon(36.240648, -115.135846), 1000);
-const distNW = new Warehouse("NW Vegas", new LatLon(36.240648, -115.125846), 1000);
+const distNW = new Warehouse("NW Vegas", new LatLon(36.264499, -115.268259), 1000);
 const weather = new Weather([
     {location: distNE.location.destinationPoint(300, 160), radius: 300, altitude: 120},
     {location: distNW.location.destinationPoint(300, 160), radius: 200, altitude: 190},
