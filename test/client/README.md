@@ -1,62 +1,60 @@
-# Drone Sim
+# Drone Sim Integration Test
 
 This project simulates clusters of drones delivering packages from warehouses to surrounding areas.  The code has four main modules
 1. hangar - represents an instance of a hangar for storing/recharging drones.  Hangars can deploy drones to warehouses.  When a drone has low battery it will return to the hangar.
 2. warehouse - represents an instance of a warehouse which distributes packages to be delivered in the surrounding region.  Warehouses hand randomized delivery jobs to drones.
-3. weather - respsentes regions of high wind.  Drones entering these regions will experience accelerated battery drain.
+3. weather - represents regions of high wind.  Drones entering these regions will experience accelerated battery drain.
 4. drone - represents a drone which completes deliver jobs.  Drones exhibit semi-realistic flight trajectory and battery drain.  Battery drain is impacted by the size of packages being delivered (payload).
 
 ## Getting Started
 
-1. Configure the emitter host variables along with emitter channel keys for `control-event`, `drone-position` and `drone-event`(via OS or .env file).  `EMITTER_HOST` defaults to `127.0.0.1` if not set.  `EMITTER_PORT` defaults to `8080` if not set.
-
-You can work with a local Emitter instance, or you can connect to the version deployed in your cluster using port-forwarding, or the NodePort 30080 and the public IP of one of the nodes.
+1. Configure the emitter emitter channel keys for `control-event`, `drone-position` and `drone-event`(via OS or .env file).
 
 ```sh
-export CHANNEL_KEY_DRONE_POSITION="pZtoyNQ_b3WPRc63Br5QJv8CCcP2gfKZ"
-export CHANNEL_KEY_DRONE_EVENT="qlnEY07lFKttkvyZbyzshmiDFPQOo232"
-export CHANNEL_KEY_CONTROL_EVENT="3Lutukd1Nj1-nPdlKNlIT5tr791G_ofn"
+export CHANNEL_KEY_CONTROL_EVENT=$(kubectl -n openfaas-fn get secret emitter -o jsonpath='{.data.control-event-key}' | base64 -d)
+export CHANNEL_KEY_DRONE_EVENT=$(kubectl -n openfaas-fn get secret emitter -o jsonpath='{.data.drone-event-key}' | base64 -d)
+export CHANNEL_KEY_DRONE_POSITION=$(kubectl -n openfaas-fn get secret emitter -o jsonpath='{.data.drone-position-key}' | base64 -d)
 ```
 
-Port-forwarding:
+2. Configure the emitter host variables `EMITTER_HOST` defaults to `127.0.0.1` if not set.  `EMITTER_PORT` defaults to `8080` if not set.
+
+You can work with a local Emitter instance, or the NodePort 30080 and the public IP of one of the nodes.
+
+To work with the hosted Emitter instance.
 
 ```sh
-kubectl port-forward -n openfaas svc/emitter 8081:8080 &
+export EMITTER_PORT=30080
+export EMITTER_HOST=147.75.66.59
 ```
 
-```sh
-export EMITTER_HOST=127.0.0.1
-export EMITTER_PORT=8081
-```
-
-Local:
+To work with a local Emitter instance:
 
 ```sh
 export EMITTER_HOST=172.23.98.23
 export EMITTER_PORT=8124
 ```
 
-2. Configure the warehouse and hangar initializers in app.ts to reflect your desired behavior.  By default it will deploy 20 drones to two warehouses in north Las Vegas.  Once the drones deplete their battery they will return to the hangar.
+3. Configure the warehouse and hangar initializers in app.ts to reflect your desired behavior.  By default it will deploy 20 drones to two warehouses in north Las Vegas.  Once the drones deplete their battery they will return to the hangar.
 
-3. Launch the simulator
+4. Launch the simulator
 
-    ```sh
-    npm i
-    npm start
-    ```
+```sh
+npm i
+npm start
+```
 
-4. A listener module is included which will connect to emitter and monitor events created by the simulator.  Usage is optional once you've started the simulator.
+5. A listener module is included which will connect to emitter and monitor events created by the simulator.  Usage is optional once you've started the simulator.
 
-    ```sh
-    node build/listener.js
-    ```
+```sh
+node build/listener.js
+```
 
-## Modifying Simuation Behavior
+## Modifying Situation Behavior
 The simulation allows you to specify the location of hangars, warehouses, and weather by updating [app.ts](/src/app.ts).   
 
 ## Drone Position Updates
 
-Drones report their status via mqtt using emitter.io on the `drone-position` channel. 
+Drones report their status via MQTT using emitter.io on the `drone-position` channel. 
 
 ```ts
 this.client.publish({
