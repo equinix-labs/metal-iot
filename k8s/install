@@ -82,7 +82,7 @@ if [[ ! -e /usr/bin/git ]]; then
     apt-get install -y -q git
 fi
 
-# Copy our conifguration to where Helm expects to find it.
+# Copy our configuration to where Helm expects to find it.
 cp /etc/rancher/k3s/k3s.yaml ~/.kube/config
 
 if ! helm version > /dev/null; then
@@ -339,6 +339,6 @@ EOF
 }
 
 if [[ -z "$(kubectl -n openfaas-fn get pods drone-controller -o json 2>/dev/null)" ]]; then
-    echo ">>> install done contoller pod"
+    echo ">>> install done controller pod"
     controller_pod | kubectl create -f -
 fi
