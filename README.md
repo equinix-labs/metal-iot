@@ -26,7 +26,9 @@ Components exposed with TLS / Ingress or NodePort:
 
 ## Getting started
 
-Everything you need to deploy this workshop is available in this repository.
+Before you begin using this repo you will need a [Packet](https://app.packet.net/signup) account.
+
+Everything else you need to deploy this workshop is available in this repository.
 
 > Note: This repository is designed to be used with your own domain name and a number of DNS records. This enables TLS termination (HTTPS) to be used for exposed services. If you are working in development, you can skip the domain and TLS steps. 
 
