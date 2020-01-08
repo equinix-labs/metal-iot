@@ -187,7 +187,7 @@ while [[ -z "$(kubectl -n openfaas get secrets -o json | jq '.items[] | select(.
       --from-literal emitter-secret-key="$emitter_secret_key"
 done
 
-if [[ -z "$(helm ls emitter -o json)" ]]; then
+if [[ -z "$(helm ls emitter --output json)" ]]; then
     echo ">>> install emitter chart"
     helm install --set domain="$domain" --name emitter --namespace openfaas ~/iot/emitter/chart
 fi
