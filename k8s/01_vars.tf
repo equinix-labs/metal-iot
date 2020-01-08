@@ -6,6 +6,14 @@ variable "project_id" {
   description = "Packet Project ID"
 }
 
+variable "email" {
+  description = "E-mail address to use for certificate registration."
+}
+
+variable "domain_name" {
+  description = "Domain name to use for SSL certificate generation."
+}
+
 variable "hostname" {
   description = "The hostname for nodes"
   default = "k3s"
@@ -43,20 +51,15 @@ variable "billing_cycle" {
 
 variable "repo" {
   description = "GitHub repo to use for demo source."
-}
-
-variable "email" {
-  description = "E-mail address to use for certificate registration."
+  default = "git@github.com:packet-labs/iot.git"
 }
 
 variable "branch" {
   description = "GitHub branch to use for demo source."
+  default = "master"
 }
 
 variable "docker_hub" {
   description = "Docker Hub user name from which to pull demo images."
-}
-
-variable "domain_name" {
-  description = "Domain name to use for SSL certificate generation."
+  default = "packetiotdemo"
 }

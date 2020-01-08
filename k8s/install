@@ -48,7 +48,7 @@ function stop_forwards {
 # Install latest Helm 2.
 if ! which helm > /dev/null; then
     (cd $dir && {
-        curl -LO https://get.helm.sh/helm-v2.16.1-linux-amd64.tar.gz
+        curl -sLO https://get.helm.sh/helm-v2.16.1-linux-amd64.tar.gz
         tar zxf helm-v*-linux-amd64.tar.gz
         mv linux-amd64/helm /usr/local/bin
         chmod +x /usr/local/bin/helm
@@ -207,21 +207,28 @@ function keygen {
 }
 
 if [[ -z "$(kubectl -n openfaas-fn get secret emitter -o json)" ]]; then
+    echo ">>> create drone_position_key"
     drone_position_key=$(keygen "drone-position/")
+    echo ">>> create drone_event_key"
     drone_event_key=$(keygen "drone-event/")
+    echo ">>> create control_event_key"
     control_event_key=$(keygen "control-event/")
+    echo ">>> create secret emitter"
     kubectl create secret generic -n openfaas-fn emitter \
       --from-literal drone-position-key="$drone_position_key" \
       --from-literal drone-event-key="$drone_event_key" \
       --from-literal control-event-key="$control_event_key"
+    echo ">>> git clone mqtt-controller"
     git clone -q https://github.com/openfaas-incubator/mqtt-connector ~/mqtt-connector
     pushd ~/mqtt-connector/chart
+    echo ">>> git install mqtt-controller for drone-position"
     set "drone-position/ $drone_position_key"
     helm template --name drone-position --namespace openfaas mqtt-connector/ --values mqtt-connector/values.yaml  \
       --set trimChannelKey=false \
       --set topic="$drone_position_key/drone-position/" \
       --set broker=tcp://emitter:8080 \
     | kubectl apply -f -
+    echo ">>> git install mqtt-controller for drone-event"
     set "drone-event/ $drone_event_key"
     helm template --name drone-event --namespace openfaas mqtt-connector/ --values mqtt-connector/values.yaml  \
       --set trimChannelKey=false \
@@ -231,24 +238,27 @@ if [[ -z "$(kubectl -n openfaas-fn get secret emitter -o json)" ]]; then
     popd > /dev/null
 fi
 
+echo ">>> apply SQL schema"
 postgres_password=$(kubectl get secret --namespace default postgresql -o jsonpath="{.data.postgresql-password}" | base64 --decode)
 kubectl run postgresql-client-$(date +%s) --rm -i --restart='Never' --namespace default --image docker.io/bitnami/postgresql:11.6.0-debian-9-r0 \
     --env="PGPASSWORD=$postgres_password" --command -- sh -c 'psql --host postgresql -U postgres -d postgres -p 5432' < ~/iot/openfaas/services/schema.sql
 
 # Forward the OpenFaaS port.
+echo ">>> forward openfaas port"
 kubectl port-forward -n openfaas svc/gateway 8085:8080 &
 forwards+=("$!")
 echo "forwards" ${forwards[@]}
 
 # Wait for OpenFaaS to become available.
 export OPENFAAS_URL=http://127.0.0.1:8085
-while ! curl -df "$OPENFAAS_URL" > /dev/null; do
-    echo "Waiting for OpenFaaS port forwarding."
+while ! curl -sdf "$OPENFAAS_URL" > /dev/null; do
+    echo ">>> waiting for openfaas port forwarding"
     sleep 1
 done
 export DOCKER_USER=$docker
 
 # Deploy drone functions.
+echo ">>> deploy openfaas drone functions"
 pushd ~/iot/openfaas/services > /dev/null
 PASSWORD=$(kubectl get secret -n openfaas basic-auth -o jsonpath="{.data.basic-auth-password}" | base64 --decode; echo)
 echo -n $PASSWORD | faas-cli login --username admin --password-stdin
@@ -261,7 +271,9 @@ if [[ -z "$(kubectl get namespace cert-manager -o json 2>/dev/null)" ]]; then
 fi
 
 if [[ $certs -eq 1 && -z "$(helm ls cert-manager --output json 2>/dev/null)" ]]; then
+    echo ">>> install cert-manager custom resource definitions"
     kubectl apply --validate=false -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.12/deploy/manifests/00-crds.yaml
+    echo ">>> install cert-manager chart"
     helm repo add jetstack https://charts.jetstack.io
     helm repo update
     helm install --name cert-manager --namespace cert-manager jetstack/cert-manager
@@ -273,9 +285,10 @@ if [[ $certs -eq 1 && -z "$(helm ls cert-manager --output json 2>/dev/null)" ]];
         echo "waiting for cert manager webhook"
         sleep 5
     done
+    echo ">>> install openfaas ingress"
     k3sup app install openfaas-ingress --domain gateway."$domain" --email "$email" --ingress-class traefik
 else
-    echo "skipping cert-manager"
+    echo ">>> skipping cert-manager"
 fi
 
 function controller_pod {
@@ -315,8 +328,7 @@ spec:
 EOF
 }
 
-controller_pod
-
 if [[ -z "$(kubectl -n openfaas-fn get pods drone-controller -o json 2>/dev/null)" ]]; then
+    echo ">>> install done contoller pod"
     controller_pod | kubectl create -f -
 fi
