@@ -1,7 +1,11 @@
 #!/bin/bash
 
-while getopts ':e:r:d:b:D:' opt; do
+certs=1
+while getopts ':e:r:d:b:D:c' opt; do
     case ${opt} in
+        c)
+            certs=0
+            ;;
         e)
             email=$OPTARG
             ;;
@@ -74,8 +78,8 @@ roleRef:
 EOF
 
 if [[ ! -e /usr/bin/git ]]; then
-    apt-get update
-    apt-get install -y git
+    apt-get update -q
+    apt-get install -y -q git
 fi
 
 # Copy our conifguration to where Helm expects to find it.
@@ -153,8 +157,8 @@ if [[ -z "$(kubectl -n openfaas-fn get secret db -o json)" ]]; then
 fi
 
 if [[ ! -e ~/iot ]]; then
-    git clone "$repo" ~/iot
-    git -C ~/iot checkout "$branch"
+    git clone -q "$repo" ~/iot
+    git -C ~/iot checkout -q "$branch"
 fi
 
 git -C ~/iot status
@@ -210,7 +214,7 @@ if [[ -z "$(kubectl -n openfaas-fn get secret emitter -o json)" ]]; then
       --from-literal drone-position-key="$drone_position_key" \
       --from-literal drone-event-key="$drone_event_key" \
       --from-literal control-event-key="$control_event_key"
-    git clone https://github.com/openfaas-incubator/mqtt-connector ~/mqtt-connector
+    git clone -q https://github.com/openfaas-incubator/mqtt-connector ~/mqtt-connector
     pushd ~/mqtt-connector/chart
     set "drone-position/ $drone_position_key"
     helm template --name drone-position --namespace openfaas mqtt-connector/ --values mqtt-connector/values.yaml  \
@@ -256,7 +260,7 @@ if [[ -z "$(kubectl get namespace cert-manager -o json 2>/dev/null)" ]]; then
     kubectl create namespace cert-manager
 fi
 
-if [[ -z "$(helm ls cert-manager --output json 2>/dev/null)" ]]; then
+if [[ $certs -eq 1 && -z "$(helm ls cert-manager --output json 2>/dev/null)" ]]; then
     kubectl apply --validate=false -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.12/deploy/manifests/00-crds.yaml
     helm repo add jetstack https://charts.jetstack.io
     helm repo update
@@ -270,6 +274,8 @@ if [[ -z "$(helm ls cert-manager --output json 2>/dev/null)" ]]; then
         sleep 5
     done
     k3sup app install openfaas-ingress --domain gateway."$domain" --email "$email" --ingress-class traefik
+else
+    echo "skipping cert-manager"
 fi
 
 function controller_pod {
