@@ -51,7 +51,7 @@ variable "billing_cycle" {
 
 variable "repo" {
   description = "GitHub repo to use for demo source."
-  default = "git@github.com:packet-labs/iot.git"
+  default = "https://github.com/packet-labs/iot.git"
 }
 
 variable "branch" {
