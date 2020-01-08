@@ -2,17 +2,17 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    run: grafana
+    app: grafana
   name: grafana
 spec:
   replicas: 1
   selector:
     matchLabels:
-      run: grafana
+      app: grafana
   template:
     metadata:
       labels:
-        run: grafana
+        app: grafana
     spec:
       containers:
       - image: stefanprodan/faas-grafana:4.6.3
