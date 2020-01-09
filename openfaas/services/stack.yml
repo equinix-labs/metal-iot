@@ -46,7 +46,7 @@ functions:
   render-map:
     lang: dockerfile
     handler: ./render-map
-    image: ${DOCKER_USER:-packetiotdemo}/render-map:0.4.0
+    image: ${DOCKER_USER:-packetiotdemo}/render-map:0.4.1
     labels:
       com.openfaas.scale.min: 1
       com.openfaas.scale.max: 1
