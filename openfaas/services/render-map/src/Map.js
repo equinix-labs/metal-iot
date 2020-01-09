@@ -23,8 +23,8 @@ export class Map extends React.Component {
             apiBaseUrl = "";
         }
 
-        this.positionsUrl = baseURL + apiBaseUrl + "/function/db-reader.openfaas-fn/positions-geojson";
-        this.publisherUrl = baseURL + apiBaseUrl + "/function/mqtt-publisher.openfaas-fn";
+        this.positionsUrl = baseURL + apiBaseUrl + "/function/db-reader/positions-geojson";
+        this.publisherUrl = baseURL + apiBaseUrl + "/function/mqtt-publisher";
     }
 
     componentDidMount() {
