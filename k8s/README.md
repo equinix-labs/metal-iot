@@ -2,6 +2,8 @@
 
 These files will allow you to use [Terraform](http://terraform.io) to deploy a [Kubernetes](http://kubernetes.io) cluster using [k3s](http://k3s.io), The certified Kubernetes distribution built for IoT & Edge computing!
 
+The deployment will deploy k3s and the entire server-side of the Sprint/Packet drone IoT demo. When it is done, you will be able to visit `https://gateway.yourdomain.com/function/render-map` to view the demo.
+
 ## Install Terraform
 
 Terraform is just a single binary.  Visit their [download page](https://www.terraform.io/downloads.html), choose your operating system, make the binary executable, and move it into your path.
@@ -20,7 +22,7 @@ Terraform uses modules to deploy infrastructure. In order to initialize the modu
 
 ## Modify your variables
 
-This is set to run pretty well out of the box. The only two variables you need to set are: `auth_token` & `project_id`. Both of these variables can be found in the Packet UI.
+This is set to run pretty well out of the box. You need to set are `auth_token` & `project_id` to connect to Packet. Both of these variables can be found in the Packet UI. You will also need to set the `domain_name` of the domain you are using to host the demo and an `email` to submit with your SSL certificate requests to the Let's Encrypt certificate authority.
 
 The **auth token** can be found using the dropdown at the top right of the screen under `API Keys`. If you don't have one, you can create one by clicking `+ Add`.
 
@@ -34,6 +36,8 @@ Once you have collected your variables the easiest way to save them for future u
 cat <<EOF >terraform.tfvars
 auth_token = "<auth_token>"
 project_id = "<project_id>"
+domain_name = "example.com"
+email = "admin@example.com"
 EOF
 ```
 
