@@ -44,12 +44,9 @@ git clone https://github.com/packet-labs/iot
 
 You will use [Terraform](https://www.terraform.io) to [create the cluster and deploy components](/k8s/).
 
-Once deployed find the IP for one of the cluster nodes in terraform console output, your Packet dashboard or the `.tfstate` file in /k8s/. Create four DNS A records using this IP (replace `example.com` with your domain):
+Once deployed find the IP for one of the cluster nodes in terraform console output, your Packet dashboard or the `.tfstate` file in /k8s/. Create a wildcard DNS A record using this IP (replace `example.com` with your domain):
 
-* `A gateway.example.com - <IP>`
-* `A grafana.example.com - <IP>`
-* `A metabase.example.com - <IP>`
-* `A emitter.example.com - <IP>`
+* `A *.example.com - <IP>`
 
 ### 3) Generate Drone Data
 
