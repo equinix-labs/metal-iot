@@ -89,6 +89,18 @@
     }
     ```
 
+* mqtt-publisher
+
+    Broadcasts a POST body as an MQTT message on the `control-event/` channel.  Content of the message is left up to the publishers and consumers - the example below references the [cancel control event](/test/client#event-type-cancel).
+    
+    ```sh
+
+    # Send all drones servicing the NE Vegas warehouse back to the hangar 
+    curl 127.0.0.1:8080/function/mqtt-publisher \
+    --data '{"type": "cancel", "filter": {"warehouse":  "NE Vegas"}, "data": {}}' \
+    -H "Content-Type: application/json"
+    ```
+
 * render-map
 
     Static webpage assets generated from a webpack build. The webpage is written in React and renders locations from the `db-reader` endpoint using GeoJSON.

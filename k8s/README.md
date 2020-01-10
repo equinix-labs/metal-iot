@@ -60,9 +60,9 @@ You can now login to the first node in the cluster by copy and pasting the ssh c
 
 ### Get `kubectl` access on your laptop
 
-You can also get access to `kubectl` from your local machine, which is more convenient than logging into the master each time.
+Start by [installing kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) on your local machine, which is more convenient than logging into the master each time.
 
-Install k3sup
+Next install k3sup
 
 ```sh
 curl -SLsf https://get.k3sup.dev | sudo sh
