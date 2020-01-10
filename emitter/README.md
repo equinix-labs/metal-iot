@@ -29,7 +29,7 @@ kubectl create secret generic emitter-secret -n openfaas --from-literal "secret=
 
 * Copy the new license into `broker.yaml`
 
-* Update `replicas: 3` with the number of nodes, use "1" for the default
+* Update `replicas: 1` with the number of nodes, use "1" for the default
 
     For simplicity, the broker is deployed to the `openfaas` namespace.
 

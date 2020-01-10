@@ -11,9 +11,9 @@ This project simulates clusters of drones delivering packages from warehouses to
 1. Configure the emitter emitter channel keys for `control-event`, `drone-position` and `drone-event`(via OS or .env file).
 
 ```sh
-export CHANNEL_KEY_CONTROL_EVENT=$(kubectl -n openfaas-fn get secret emitter -o jsonpath='{.data.control-event-key}' | base64 -d)
-export CHANNEL_KEY_DRONE_EVENT=$(kubectl -n openfaas-fn get secret emitter -o jsonpath='{.data.drone-event-key}' | base64 -d)
-export CHANNEL_KEY_DRONE_POSITION=$(kubectl -n openfaas-fn get secret emitter -o jsonpath='{.data.drone-position-key}' | base64 -d)
+export CHANNEL_KEY_CONTROL_EVENT=$(kubectl -n openfaas-fn get secret emitter -o jsonpath='{.data.control-event-key}' | base64 -D)
+export CHANNEL_KEY_DRONE_EVENT=$(kubectl -n openfaas-fn get secret emitter -o jsonpath='{.data.drone-event-key}' | base64 -D)
+export CHANNEL_KEY_DRONE_POSITION=$(kubectl -n openfaas-fn get secret emitter -o jsonpath='{.data.drone-position-key}' | base64 -D)
 ```
 
 2. Configure the emitter host variables `EMITTER_HOST` defaults to `127.0.0.1` if not set.  `EMITTER_PORT` defaults to `8080` if not set.
