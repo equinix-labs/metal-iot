@@ -2,7 +2,7 @@
 
 These files will allow you to use [Terraform](http://terraform.io) to deploy a [Kubernetes](http://kubernetes.io) cluster using [k3s](http://k3s.io), The certified Kubernetes distribution built for IoT & Edge computing!
 
-The deployment will deploy k3s and the entire server-side of the Sprint/Packet drone IoT demo. When it is done, you will be able to visit `https://gateway.yourdomain.com/function/render-map` to view the demo.
+The deployment will deploy k3s and the entire server-side of the Sprint/Equinix Metal drone IoT demo. When it is done, you will be able to visit `https://gateway.yourdomain.com/function/render-map` to view the demo.
 
 ## Install Terraform
 
@@ -22,11 +22,11 @@ Terraform uses modules to deploy infrastructure. In order to initialize the modu
 
 ## Modify your variables
 
-This is set to run pretty well out of the box. You need to set are `auth_token` & `project_id` to connect to Packet. Both of these variables can be found in the Packet UI. You will also need to set the `domain_name` of the domain you are using to host the demo and an `email` to submit with your SSL certificate requests to the Let's Encrypt certificate authority.
+This is set to run pretty well out of the box. You need to set are `auth_token` & `project_id` to connect to Equinix Metal. Both of these variables can be found in the Equinix Metal UI. You will also need to set the `domain_name` of the domain you are using to host the demo and an `email` to submit with your SSL certificate requests to the Let's Encrypt certificate authority.
 
 The **auth token** can be found using the dropdown at the top right of the screen under `API Keys`. If you don't have one, you can create one by clicking `+ Add`.
 
-The **project id** is a little more hidden. The best way to find this is by being logged into the Packet UI and be on the `SERVERS` section inside the project you want to deploy into. Then copy the UUID after `https://app.packet.net/projects/` in the address bar.
+The **project id** is a little more hidden. The best way to find this is by being logged into the Equinix Metal UI and be on the `SERVERS` section inside the project you want to deploy into. Then copy the UUID after `https://console.equinix.com/projects/` in the address bar.
 
 The **node_count** defaults to 1 node, but should be set at at least 3-5 nodes for a production setup depending on the size of the dataset to be ingested.
 
@@ -108,8 +108,8 @@ kubectl config set-contexts NAME
 ## Other Variables
 | Variable Name | Default Value | Description |
 | :-----------: |:------------: | :----------|
-| auth_token | n/a | Packet API Key |
-| project_id | n/a | Packet Project ID |
+| auth_token | n/a | Equinix Metal API Key |
+| project_id | n/a | Equinix Metal Project ID |
 | hostname | k3s | The hostname for nodes |
 | node_size | t1.small.x86| The size or type or flavor of the node |
 | facility | ewr1 | The location or datacenter for the node |

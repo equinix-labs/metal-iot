@@ -1,16 +1,16 @@
-provider "packet" {
+provider "metal" {
   auth_token = var.auth_token
 }
 
 data "template_file" "user_data" {
-    template = file("templates/user_data.sh")
-    vars = {
-        priv_key = chomp(tls_private_key.ssh_key.private_key_pem)
-        pub_key = chomp(tls_private_key.ssh_key.public_key_openssh)
-    }
+  template = file("templates/user_data.sh")
+  vars = {
+    priv_key = chomp(tls_private_key.ssh_key.private_key_pem)
+    pub_key  = chomp(tls_private_key.ssh_key.public_key_openssh)
+  }
 }
 
-resource "packet_device" "k3s_nodes" {
+resource "metal_device" "k3s_nodes" {
   count            = var.node_count
   hostname         = format("%s-%02d", var.hostname, count.index + 1)
   plan             = var.node_size
