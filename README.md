@@ -1,10 +1,10 @@
 ![](https://img.shields.io/badge/Stability-Experimental-red.svg)
 
-# Packet Labs IoT workshop
+# Equinix Labs IoT workshop
 
-This workshop deploys compute, storage, networking, and an IoT application to Packet.com.
+This workshop deploys compute, storage, networking, and an IoT application to metal.equinix.com.
 
-This repository is [Experimental](https://github.com/packethost/standards/blob/master/experimental-statement.md) meaning that it's based on untested ideas or techniques and not yet established or finalized or involves a radically new and innovative style! This means that support is best effort (at best!) and we strongly encourage you to NOT use this in production.
+This repository is [Experimental](https://github.com/equinix-labs/equinix-labs/blob/main/experimental-statement.md) meaning that it's based on untested ideas or techniques and not yet established or finalized or involves a radically new and innovative style! This means that support is best effort (at best!) and we strongly encourage you to NOT use this in production.
 
 ## Conceptual architecture
 
@@ -30,7 +30,7 @@ Components exposed with TLS / Ingress or NodePort:
 
 ## Getting started
 
-Before you begin using this repo you will need a [Packet](https://app.packet.net/signup) account.
+Before you begin using this repo you will need an [Equinix Metal](https://console.equinix.com) account.
 
 Everything else you need to deploy this workshop is available in this repository.
 
@@ -41,18 +41,18 @@ Everything else you need to deploy this workshop is available in this repository
 ### 1) Clone the repo
 
 ```sh
-git clone https://github.com/packet-labs/iot
+git clone https://github.com/equinix-labs/metal-iot
 ```
 
 ### 2) Create a bare-metal Kubernetes cluster
 
 You will need to [install Terraform](https://www.terraform.io) for this step.
 
-* Set your Packet API and project ID in a terraform.tfvar file in `/k8s`.
+* Set your Equinix Metal API and project ID in a terraform.tfvar file in `/k8s`.
 
 * Enter [the `k8s` folder](/k8s/) and apply the terraform plan.
 
-* Find the IP of one of the nodes in the cluster from your Packet dashboard or the state file in /k8s/
+* Find the IP of one of the nodes in the cluster from your Equinix Metal dashboard or the state file in /k8s/
 
 Create four DNS A records (replace `example.com` with your domain):
 

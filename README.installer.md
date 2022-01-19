@@ -1,6 +1,6 @@
-# Packet Labs IoT workshop
+# Equinix Labs IoT workshop
 
-This workshop deploys compute, storage, networking, and an IoT application to Packet.com.
+This workshop deploys compute, storage, networking, and an IoT application to metal.equinix.com.
 
 ## Conceptual architecture
 
@@ -26,7 +26,7 @@ Components exposed with TLS / Ingress or NodePort:
 
 ## Getting started
 
-Before you begin using this repo you will need a [Packet](https://app.packet.net/signup) account.
+Before you begin using this repo you will need an [Equinix Metal](https://console.equinix.com) account.
 
 Everything else you need to deploy this workshop is available in this repository.
 
@@ -37,14 +37,14 @@ Everything else you need to deploy this workshop is available in this repository
 ### 1) Clone the repo
 
 ```sh
-git clone https://github.com/packet-labs/iot
+git clone https://github.com/equinix-labs/metal-iot
 ```
 
 ### 2) Create a bare-metal Kubernetes cluster and deploy the application
 
 You will use [Terraform](https://www.terraform.io) to [create the cluster and deploy components](/k8s/).
 
-Once deployed find the IP for one of the cluster nodes in terraform console output, your Packet dashboard or the `.tfstate` file in /k8s/. Create a wildcard DNS A record using this IP (replace `example.com` with your domain):
+Once deployed find the IP for one of the cluster nodes in terraform console output, your Equinix Metal dashboard or the `.tfstate` file in /k8s/. Create a wildcard DNS A record using this IP (replace `example.com` with your domain):
 
 * `A *.example.com - <IP>`
 
